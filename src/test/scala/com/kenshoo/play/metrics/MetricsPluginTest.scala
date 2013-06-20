@@ -3,7 +3,7 @@ package com.kenshoo.play.metrics
 import org.specs2.mutable.Specification
 import org.specs2.mock.Mockito
 import play.api.{Configuration, Application}
-import com.codahale.metrics.{Metric, Meter, SharedMetricRegistries}
+import com.codahale.metrics.{Metric, SharedMetricRegistries}
 import org.specs2.specification.BeforeAfterExample
 import scala.collection.JavaConversions._
 import scala.collection.mutable.Map
