@@ -50,9 +50,9 @@ Add a mapping to the controller to conf/routes file
      GET     /admin/metrics              com.kenshoo.play.metrics.MetricsController.metrics
      
 #### Configuration
-To control the time units for rate and duration, the following configuration is supported:
+Some configuration is supported through the default configuration file:
 
-    metrics.rateUnit - (default is SECONDS)
+    metrics.rateUnit - (default is SECONDS) 
 
     metrics.durationUnit (default is SECONDS)
 
