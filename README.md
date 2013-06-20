@@ -1,6 +1,8 @@
 # metrics-play
 
-This module provides some support for Coda Hale Metrics library in a Play2 application (Scala)
+This module provides some support for @codahale [Metrics](http://metrics.codahale.com/) library in a Play2 application (Scala)
+
+Play Version: 2.1.1, Metrics Version: 3.0.0, Scala Version: 2.10.0
 
 ## Features
 
@@ -27,6 +29,48 @@ add to conf/play.plugins the following line
 
 where priority is the priority of this plugin in respect to other plugins.
 
+### Default Registry
+
+```scala
+     import com.kenshoo.play.metrics.MetricsRegistry
+     import com.codahale.metrics.Counter
+
+     val counter = MetricsRegistry.default.counter("name")
+     counter.inc()
+````
+
+### Metrics Controller
+
+An implementation of the [metrics-servlet](http://metrics.codahale.com/manual/servlets/) as a play2 controller.
+
+Exports all metrics as a json document
+
+Add a mapping to the controller to conf/routes file
+
+     GET     /admin/metrics              com.kenshoo.play.metrics.MetricsController.metrics
+     
+#### Configuration
+To control the time units for rate and duration, the following configuration is supported:
+
+    metrics.rateUnit - (default is SECONDS)
+
+    metrics.durationUnit (default is SECONDS)
+
+    metrics.showSamples [true/false] (default is false)
+
+    metrics.jvm - [true/false] (default is true)
+
+### Metrics Filter
+
+An implementation of Metrics' instrumenting filter for Play2, it records requests duration, number of active requests and counts each return code
+
+
+```scala
+    import com.kenshoo.play.metrics.MetricsFilter
+    import play.api.mvc._
+
+    object Global extends WithFilters(MetricsFilter)
+```
 
 
 
