@@ -22,12 +22,13 @@ Add metrics-play dependency:
     )
 ```
 
-Enable the plugin:
+To enable the plugin:
+
 add to conf/play.plugins the following line
 
      {priority}:com.kenshoo.play.metrics.MetricsPlugin
 
-where priority is the priority of this plugin in respect to other plugins.
+where priority is the priority of this plugin with respect to other plugins.
 
 ### Default Registry
 
@@ -43,9 +44,9 @@ where priority is the priority of this plugin in respect to other plugins.
 
 An implementation of the [metrics-servlet](http://metrics.codahale.com/manual/servlets/) as a play2 controller.
 
-Exports all metrics as a json document
+It xports all registered metrics as a json document.
 
-Add a mapping to the controller to conf/routes file
+To enable the controller add a mapping to conf/routes file
 
      GET     /admin/metrics              com.kenshoo.play.metrics.MetricsController.metrics
      
@@ -62,7 +63,7 @@ Some configuration is supported through the default configuration file:
 
 ### Metrics Filter
 
-An implementation of Metrics' instrumenting filter for Play2, it records requests duration, number of active requests and counts each return code
+An implementation of the Metrics' instrumenting filter for Play2. It records requests duration, number of active requests and counts each return code
 
 
 ```scala
