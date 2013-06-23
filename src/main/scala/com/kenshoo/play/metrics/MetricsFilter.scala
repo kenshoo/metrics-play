@@ -13,7 +13,9 @@ abstract class MetricsFilter extends EssentialFilter {
 
   val registry: MetricRegistry
 
-  val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND, Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
+  val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
+    Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
+
   lazy val requestsTimer: Timer = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
   lazy val activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
   lazy val statusCodes: Map[Int, Meter] = knownStatuses.map (s => s -> registry.meter(name(classOf[MetricsFilter], s.toString))).toMap
