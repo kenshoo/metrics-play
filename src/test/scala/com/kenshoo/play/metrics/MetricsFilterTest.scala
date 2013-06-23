@@ -7,6 +7,7 @@ import play.api.test.Helpers._
 import com.codahale.metrics._
 import play.api.test.FakeApplication
 import scala.Some
+import scala.collection.JavaConversions._
 
 
 class MetricsFilterSpec extends Specification {
@@ -21,6 +22,8 @@ class MetricsFilterSpec extends Specification {
     "increment status code counter" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
       val meter: Meter = registry.meter(MetricRegistry.name(classOf[MetricsFilter], "200"))
+      val meters: Map[String, Meter] = registry.getMeters.toMap
+      meters.foreach(m => println(m._1 +": " + m._2.getCount))
       meter.getCount must equalTo(1)
     }
 
