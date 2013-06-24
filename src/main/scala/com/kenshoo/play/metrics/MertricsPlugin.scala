@@ -42,6 +42,13 @@ class MetricsPlugin(val app: Application) extends Plugin {
     }
   }
 
+
+  override def onStop() {
+    if (enabled) {
+      SharedMetricRegistries.remove(registryName)
+    }
+  }
+
   override def enabled = app.configuration.getBoolean("metrics.enabled").getOrElse(true)
 }
 
