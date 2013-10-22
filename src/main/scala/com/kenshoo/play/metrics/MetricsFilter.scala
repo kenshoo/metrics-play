@@ -25,7 +25,7 @@ abstract class MetricsFilter extends EssentialFilter {
     def apply(rh: RequestHeader) = {
       val context = requestsTimer.time()
 
-      def logCompleted(result: PlainResult): Result = {
+      def logCompleted(result: SimpleResult): SimpleResult = {
         activeRequests.dec()
         context.stop()
         statusCodes.getOrElse(result.header.status, otherStatuses).mark()
@@ -34,8 +34,7 @@ abstract class MetricsFilter extends EssentialFilter {
 
       activeRequests.inc()
       next(rh) map  {
-        case plain: PlainResult => logCompleted(plain)
-        case async: AsyncResult => async.transform(logCompleted)
+        case result: SimpleResult => logCompleted(result)
       }
     }
   }
