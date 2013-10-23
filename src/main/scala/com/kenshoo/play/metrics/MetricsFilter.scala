@@ -33,9 +33,7 @@ abstract class MetricsFilter extends EssentialFilter {
       }
 
       activeRequests.inc()
-      next(rh) map  {
-        case result: SimpleResult => logCompleted(result)
-      }
+      next(rh).map(logCompleted)
     }
   }
 }
