@@ -10,13 +10,13 @@ import com.codahale.metrics.MetricRegistry
 class MetricsControllerSpec extends Specification {
   "metrics servlet" should {
     "returns json result" in new ControllerRegistry {
-      val result: Result = controller.metrics(FakeRequest())
+      val result = controller.metrics(FakeRequest())
       val jsValue: JsValue = Json.parse(contentAsString(result))
       (jsValue \ "counters" \ "my-counter" \ "count").as[Int] mustEqual(1)
     }
 
     "sets no cache control" in new ControllerRegistry {
-      val result: Result = controller.metrics(FakeRequest())
+      val result = controller.metrics(FakeRequest())
       headers(result) must haveValue("must-revalidate,no-cache,no-store")
     }
 
