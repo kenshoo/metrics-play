@@ -1,20 +1,20 @@
 package com.kenshoo.play.metrics
 
+import java.io.StringWriter
+
+import play.api.{Application, Play}
 import play.api.mvc.{Action, Controller}
+
 import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.{ObjectWriter, ObjectMapper}
-import java.io.StringWriter
-import play.api.Play.current
-import play.api.Application
-
 
 
 trait MetricsController {
   self: Controller =>
 
-  val registry: MetricRegistry
+  def registry: MetricRegistry
 
-  val app: Application
+  def app: Application
 
   def serialize(mapper: ObjectMapper) = {
     val writer: ObjectWriter = mapper.writerWithDefaultPrettyPrinter()
@@ -25,10 +25,11 @@ trait MetricsController {
 
   def metrics = Action {
     app.plugin[MetricsPlugin] match {
-      case Some(plugin)  => plugin.enabled match {
-        case true => serialize(plugin.mapper)
-        case false => InternalServerError("metrics plugin not enabled")
-      }
+      case Some(plugin) =>
+        if (plugin.enabled)
+          serialize(plugin.mapper)
+        else
+          InternalServerError("metrics plugin not enabled")
       case None => InternalServerError("metrics plugin is not found")
     }
   }
@@ -36,6 +37,6 @@ trait MetricsController {
 }
 
 object MetricsController extends Controller with MetricsController {
-  lazy val registry = MetricsRegistry.default
-  lazy val app = current
+  def registry = MetricsRegistry.default
+  def app = Play.current
 }
