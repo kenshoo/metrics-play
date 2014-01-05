@@ -75,6 +75,5 @@ An implementation of the Metrics' instrumenting filter for Play2. It records req
     object Global extends WithFilters(MetricsFilter)
 ```
 
-
-
-
+## License
+This code is released under the Apache Public License 2.0.
