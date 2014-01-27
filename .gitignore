@@ -2,3 +2,6 @@ target/
 .idea/
 .idea_modules/
 logs/
+.cache
+.classpath
+.project
