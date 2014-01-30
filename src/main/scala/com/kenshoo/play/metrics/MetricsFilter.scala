@@ -30,13 +30,12 @@ abstract class MetricsFilter extends EssentialFilter {
 
   def registry: MetricRegistry
 
-  val DEFAULT_STATUSES: Seq[Integer] =
+  val DEFAULT_STATUSES =
     Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
       Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
 
   lazy val knownStatuses = {
-    val knownStatusList: Option[java.util.List[Integer]] =
-      Play.configuration.getIntList("metrics.knownStatuses")
+    val knownStatusList = Play.configuration.getIntList("metrics.knownStatuses")
     if (knownStatusList.size != 0)
       knownStatusList.get.asScala
     else
@@ -47,7 +46,9 @@ abstract class MetricsFilter extends EssentialFilter {
 
   lazy val statusLevelMeters: Option[Map[String, Meter]] = {
     {
-      val showStatusLevelsEnabled = Play.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
+      val showStatusLevelsEnabled = 
+        Play.configuration.getBoolean("metrics.showHttpStatusLevels")
+        .getOrElse(false)
       if (showStatusLevelsEnabled) {
         newMeters[String]((1 to 5).map(_ + "xx"))
       } else None
