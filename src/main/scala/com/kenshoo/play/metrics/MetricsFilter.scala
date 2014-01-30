@@ -36,8 +36,8 @@ abstract class MetricsFilter extends EssentialFilter {
   lazy val knownStatuses = {
     val knownStatusList = Play.configuration.getIntList("metrics.knownStatuses")
     knownStatusList match {
-      case Some(s) => s.asScala
-      case None => DEFAULT_STATUSES
+   case Some(s) => s.asScala.toList.map (x => x: Int)
+   case None => DEFAULT_STATUSES
     }
   }
 
@@ -82,8 +82,8 @@ abstract class MetricsFilter extends EssentialFilter {
   }
 
   /** Creates individual meters for all the names in the given sequence */
-  private def newMeters[B](names: Seq[B]): Option[Map[B, Meter]] = {
-    Some(names.map(code => code -> newMeter(code.toString)).toMap)
+  private def newMeters(names: Seq[String]): Option[Map[String, Meter]] = {
+    Some(names.map(code => code -> newMeter(code)).toMap)
   }
 
   /** Creates a new meter with the specified name */
