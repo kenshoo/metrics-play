@@ -30,26 +30,26 @@ abstract class MetricsFilter extends EssentialFilter {
 
   def registry: MetricRegistry
 
-  val DEFAULT_STATUSES = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
+  val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
     Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
 
-  lazy val knownStatuses = {
-    val knownStatusList = Play.configuration.getIntList("metrics.knownStatuses")
-    knownStatusList match {
-   case Some(s) => s.asScala.toList.map (x => x: Int)
-   case None => DEFAULT_STATUSES
+  lazy val requestedStatuses = {
+    val userPrefStatuses = Play.configuration.getIntList("metrics.knownStatuses")
+    userPrefStatuses match {
+      case Some(s) => s.asScala.toList.map(x => x: Int)
+      case None => knownStatuses
     }
   }
 
-  lazy val statusCodes = newMeters(knownStatuses)
+  lazy val statusCodes = newMeters(requestedStatuses, requestedStatuses.map(x => x.toString))
 
-  lazy val statusLevelMeters = {
-	val showStatusLevelsEnabled =
-	  Play.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
-	if (showStatusLevelsEnabled) {
-	  val buckets = 1 to 5
-	  Some(newMeters(buckets, Some(buckets.map(x => x + "xx"))))
-	} else None
+  lazy val statusLevelMeters: Map[Int, Meter] = {
+    val showStatusLevelsEnabled =
+      Play.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
+    if (showStatusLevelsEnabled) {
+      val buckets = 1 to 5
+      newMeters(buckets, buckets.map(x => x + "xx"))
+    } else Map()
   }
 
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
@@ -63,9 +63,8 @@ abstract class MetricsFilter extends EssentialFilter {
       def logCompleted(result: SimpleResult): SimpleResult = {
         activeRequests.dec()
         context.stop()
-        val status = result.header.status
-        statusCodes.getOrElse(status, otherStatuses).mark()
-        statusLevelMeters.map(_.get(statusLevel(status)).map(_.mark))
+        statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+        statusLevelMeters.get(statusLevel(result.header.status)).map(_.mark)
         result
       }
 
@@ -78,12 +77,11 @@ abstract class MetricsFilter extends EssentialFilter {
   private def statusLevelName(s: Int): String = {
     statusLevel(s) + "xx"
   }
-  
+
   private def statusLevel(s: Int) = s / 100
 
-  private def newMeters(keys: Seq[Int], names: Option[Seq[String]] = None): Map[Int, Meter] = {
-    val realNames = names.getOrElse(keys.map (x => x.toString))
-    keys.zip(realNames.map(realNames => newMeter(realNames))).toMap
+  private def newMeters(keys: Seq[Int], names: Seq[String]): Map[Int, Meter] = {
+    keys.zip(names.map(name => newMeter(name))).toMap
   }
 
   /** Creates a new meter with the specified name */
