@@ -43,15 +43,13 @@ abstract class MetricsFilter extends EssentialFilter {
 
   lazy val statusCodes = newMeters(knownStatuses)
 
-  lazy val statusLevelMeters: Option[Map[String, Meter]] = {
-    {
-      val showStatusLevelsEnabled =
-        Play.configuration.getBoolean("metrics.showHttpStatusLevels")
-        .getOrElse(false)
-      if (showStatusLevelsEnabled) {
-        newMeters[String]((1 to 5).map(_ + "xx"))
-      } else None
-    }
+  lazy val statusLevelMeters = {
+	val showStatusLevelsEnabled =
+	  Play.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
+	if (showStatusLevelsEnabled) {
+	  val buckets = 1 to 5
+	  Some(newMeters(buckets, Some(buckets.map(x => x + "xx"))))
+	} else None
   }
 
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
@@ -66,8 +64,8 @@ abstract class MetricsFilter extends EssentialFilter {
         activeRequests.dec()
         context.stop()
         val status = result.header.status
-        statusCodes.map(_.getOrElse(status, otherStatuses).mark())
-        statusLevelMeters.map(_.get(statusLevelName(status)).map(_.mark))
+        statusCodes.getOrElse(status, otherStatuses).mark()
+        statusLevelMeters.map(_.get(statusLevel(status)).map(_.mark))
         result
       }
 
@@ -78,12 +76,14 @@ abstract class MetricsFilter extends EssentialFilter {
 
   /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
   private def statusLevelName(s: Int): String = {
-    (s / 100) + "xx"
+    statusLevel(s) + "xx"
   }
+  
+  private def statusLevel(s: Int) = s / 100
 
-  /** Creates individual meters for all the names in the given sequence */
-  private def newMeters(names: Seq[String]): Option[Map[String, Meter]] = {
-    Some(names.map(code => code -> newMeter(code)).toMap)
+  private def newMeters(keys: Seq[Int], names: Option[Seq[String]] = None): Map[Int, Meter] = {
+    val realNames = names.getOrElse(keys.map (x => x.toString))
+    keys.zip(realNames.map(realNames => newMeter(realNames))).toMap
   }
 
   /** Creates a new meter with the specified name */
