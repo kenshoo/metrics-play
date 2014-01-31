@@ -63,6 +63,10 @@ Some configuration is supported through the default configuration file:
 
     metrics.jvm - [true/false] (default is true)
 
+    metrics.showHttpStatusLevels - [true/false] (default is false)
+
+    metrics.knownStatuses - [list of Ints] (default is [200, 400, 403, 404, 201, 307, 500]) 
+
 ### Metrics Filter
 
 An implementation of the Metrics' instrumenting filter for Play2. It records requests duration, number of active requests and counts each return code
