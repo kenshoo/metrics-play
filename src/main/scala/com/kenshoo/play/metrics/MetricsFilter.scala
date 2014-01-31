@@ -54,7 +54,7 @@ abstract class MetricsFilter extends EssentialFilter {
 
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
-  lazy val otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
+  def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
 
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
