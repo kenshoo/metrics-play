@@ -48,13 +48,13 @@ abstract class MetricsFilter extends EssentialFilter {
       Play.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
     if (showStatusLevelsEnabled) {
       val buckets = 1 to 5
-      newMeters(buckets, buckets.map(x => x + "xx"))
+      newMeters(buckets, buckets.map(x => statusLevelName(x)))
     } else Map()
   }
 
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
-  def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
+  lazy val otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
 
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
@@ -75,7 +75,7 @@ abstract class MetricsFilter extends EssentialFilter {
 
   /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
   private def statusLevelName(s: Int): String = {
-    statusLevel(s) + "xx"
+    s + "xx"
   }
 
   private def statusLevel(s: Int) = s / 100
