@@ -71,12 +71,23 @@ Some configuration is supported through the default configuration file:
 
 An implementation of the Metrics' instrumenting filter for Play2. It records requests duration, number of active requests and counts each return code
 
+In scala:
 
 ```scala
     import com.kenshoo.play.metrics.MetricsFilter
     import play.api.mvc._
 
     object Global extends WithFilters(MetricsFilter)
+```
+
+In java:
+
+```java
+    public class Global extends GlobalSettings {
+        @Override
+        public <T extends EssentialFilter> Class<T>[] filters() {
+            return (Class<T>[]) new Class[]{DiMetricsFilter.class};
+    }
 ```
 
 ## License

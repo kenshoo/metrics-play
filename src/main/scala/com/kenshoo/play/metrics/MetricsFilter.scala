@@ -33,7 +33,7 @@ abstract class MetricsFilter extends EssentialFilter {
   val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
     Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
 
-  lazy val requestedStatuses = {
+  def requestedStatuses = {
     val userPrefStatuses = Play.configuration.getIntList("metrics.knownStatuses")
     userPrefStatuses match {
       case Some(s) => s.asScala.toList.map(x => x: Int)
@@ -41,9 +41,9 @@ abstract class MetricsFilter extends EssentialFilter {
     }
   }
 
-  lazy val statusCodes = newMeters(requestedStatuses, requestedStatuses.map(x => x.toString))
+  def statusCodes = newMeters(requestedStatuses, requestedStatuses.map(x => x.toString))
 
-  lazy val statusLevelMeters: Map[Int, Meter] = {
+  def statusLevelMeters: Map[Int, Meter] = {
     val showStatusLevelsEnabled =
       Play.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
     if (showStatusLevelsEnabled) {
@@ -59,6 +59,11 @@ abstract class MetricsFilter extends EssentialFilter {
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
       val context = requestsTimer.time()
+      
+      // Force instantiation of meters
+      otherStatuses
+      statusLevelMeters
+      statusCodes
 
       def logCompleted(result: SimpleResult): SimpleResult = {
         activeRequests.dec()
