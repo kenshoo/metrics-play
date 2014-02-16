@@ -86,7 +86,7 @@ In java:
     public class Global extends GlobalSettings {
         @Override
         public <T extends EssentialFilter> Class<T>[] filters() {
-            return (Class<T>[]) new Class[]{DiMetricsFilter.class};
+            return (Class<T>[]) new Class[]{MetricsFilter.class};
     }
 ```
 
