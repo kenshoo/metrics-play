@@ -18,7 +18,8 @@ package com.kenshoo.play.metrics
 import play.api.mvc._
 import play.api.http.Status
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.Play
+import play.api.Play
+import play.api.Play.current
 
 import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
@@ -28,24 +29,27 @@ import scala.collection.JavaConverters._
 abstract class MetricsFilter extends EssentialFilter {
 
   def registry: MetricRegistry
-  lazy val knownStatuses: Iterable[Int] = {
-    val knownStatusPref = Play.application().configuration().getList("metrics.knownStatuses")
-    if (knownStatusPref != null && !knownStatusPref.isEmpty()) {
-      knownStatusPref.asScala.asInstanceOf[Seq[Int]]
-    } else {
-      Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
-        Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
+
+  val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
+    Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
+
+  def requestedStatuses = {
+    val userPrefStatuses = Play.configuration.getIntList("metrics.knownStatuses")
+    userPrefStatuses match {
+      case Some(s) => s.asScala.toList.map(x => x: Int)
+      case None => knownStatuses
     }
   }
-  val knownStatusLevels = Seq(100, 200, 300, 400, 500)
 
-  def statusCodes: Map[Int, Meter] = knownStatuses.map (s => s -> registry.meter(name(classOf[MetricsFilter], s.toString))).toMap
+  def statusCodes = newMeters(requestedStatuses, requestedStatuses.map(x => x.toString))
 
-  def statusLevels: Option[Map[Int, Meter]] = {
-    val showStatusLevelsEnabled = Play.application().configuration().getBoolean("metrics.showHttpStatusLevels")
-    if (showStatusLevelsEnabled != null && showStatusLevelsEnabled) {
-      Some(knownStatusLevels.map (s => s -> registry.meter(name(classOf[MetricsFilter], statusLevelName(s)))).toMap)
-    } else None
+  def statusLevelMeters: Map[Int, Meter] = {
+    val showStatusLevelsEnabled =
+      Play.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
+    if (showStatusLevelsEnabled) {
+      val buckets = 1 to 5
+      newMeters(buckets, buckets.map(x => statusLevelName(x)))
+    } else Map()
   }
 
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
@@ -55,15 +59,17 @@ abstract class MetricsFilter extends EssentialFilter {
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
       val context = requestsTimer.time()
+      
+      // Force instantiation of meters
+      otherStatuses
+      statusLevelMeters
+      statusCodes
 
       def logCompleted(result: SimpleResult): SimpleResult = {
         activeRequests.dec()
         context.stop()
-        val status = result.header.status
-        statusCodes.getOrElse(status, otherStatuses).mark()
-        statusLevels.map(s => s.get(statusLevel(status)).map({
-          s => s.mark
-        }))
+        statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+        statusLevelMeters.get(statusLevel(result.header.status)).map(_.mark)
         result
       }
 
@@ -72,14 +78,20 @@ abstract class MetricsFilter extends EssentialFilter {
     }
   }
 
-  /** The status level of the HTTP status code (e.g., 200, 500) */
-  private def statusLevel(status: Int): Int = {
-    status / 100 * 100
-  }
-
   /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
   private def statusLevelName(s: Int): String = {
-    (s / 100).toString + "xx"
+    s + "xx"
+  }
+
+  private def statusLevel(s: Int) = s / 100
+
+  private def newMeters(keys: Seq[Int], names: Seq[String]): Map[Int, Meter] = {
+    keys.zip(names.map(name => newMeter(name))).toMap
+  }
+
+  /** Creates a new meter with the specified name */
+  private def newMeter(meterName: String): Meter = {
+    registry.meter(name(classOf[MetricsFilter], meterName))
   }
 }
 
