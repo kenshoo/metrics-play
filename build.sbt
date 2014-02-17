@@ -37,6 +37,8 @@ pomIncludeRepository := { _ => false }
 
 publishArtifact in Test := false
 
+publishMavenStyle := true
+
 pomExtra := (
   <url>https://github.com/kenshoo/metrics-play</url>
   <inceptionYear>2013</inceptionYear>
