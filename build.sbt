@@ -2,11 +2,13 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-version := "0.1.3"
+version := "0.1.4"
 
 scalaVersion := "2.10.2"
 
 resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
+
+resolvers += "Maven Central" at "http://repo1.maven.org/maven2/"
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
@@ -34,6 +36,8 @@ publishTo <<= version { (v: String) =>
 pomIncludeRepository := { _ => false }
 
 publishArtifact in Test := false
+
+publishMavenStyle := true
 
 pomExtra := (
   <url>https://github.com/kenshoo/metrics-play</url>
