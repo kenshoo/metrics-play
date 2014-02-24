@@ -83,18 +83,18 @@ In scala:
 In java:
 
 ```java
-    import play.GlobalSettings;
-    import play.api.mvc.EssentialFilter;
-    import com.kenshoo.play.metrics.MetricsFilterJava;
+import play.GlobalSettings;
+import play.api.mvc.EssentialFilter;
+import com.kenshoo.play.metrics.MetricsFilterJava;
 
-    public class Global extends GlobalSettings {
+public class Global extends GlobalSettings {
 	@Override
 	public <T extends EssentialFilter> Class<T>[] filters() {
 	    // TODO Auto-generated method stub
 	    Class<T>[] classes = new Class[] {MetricsFilterJava.class};        
 	    return classes;
-	}
     }
+}
 ```
 
 ## License
