@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "0.1.3"
+    "com.kenshoo" %% "metrics-play" % "0.1.5"
     )
 ```
 
@@ -96,6 +96,8 @@ public class Global extends GlobalSettings {
     }
 }
 ```
+
+Also exceptions handling functional was added (see [here:](https://github.com/AndrewShalimov/metrics-play/blob/addExceptionHandling/src/main/scala/com/kenshoo/play/metrics/MetricsFilter.scala#L78) )
 
 ## License
 This code is released under the Apache Public License 2.0.
