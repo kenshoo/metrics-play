@@ -25,8 +25,10 @@ import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
 
 import scala.collection.JavaConverters._
+import play.Logger
+import scala.concurrent.Future
 
-abstract class MetricsFilter extends EssentialFilter {
+abstract class MetricsFilter extends RecoverFilter {
 
   def registry: MetricRegistry
 
@@ -56,10 +58,9 @@ abstract class MetricsFilter extends EssentialFilter {
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
   def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
 
-  def apply(next: EssentialAction) = new EssentialAction {
-    def apply(rh: RequestHeader) = {
+  override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
+
       val context = requestsTimer.time()
-      
       // Force instantiation of meters
       otherStatuses
       statusLevelMeters
@@ -74,8 +75,11 @@ abstract class MetricsFilter extends EssentialFilter {
       }
 
       activeRequests.inc()
-      next(rh).map(logCompleted)
-    }
+      next(rh).recover {
+        case t: Throwable =>
+          Logger.error(s" Got an error: $t")
+          Results.InternalServerError
+      }.map(logCompleted)
   }
 
   /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
@@ -95,6 +99,6 @@ abstract class MetricsFilter extends EssentialFilter {
   }
 }
 
-object MetricsFilter extends MetricsFilter {
+object MetricsFilter {
   def registry = MetricsRegistry.default
 }
