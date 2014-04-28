@@ -99,6 +99,6 @@ abstract class MetricsFilter extends RecoverFilter {
   }
 }
 
-object MetricsFilter {
+object MetricsFilter extends MetricsFilter {
   def registry = MetricsRegistry.default
 }
