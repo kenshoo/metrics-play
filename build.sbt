@@ -12,6 +12,8 @@ resolvers += "Maven Central" at "http://repo1.maven.org/maven2/"
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
+scalacOptions in Compile ++= Seq("-feature", "-language:implicitConversions")
+
 libraryDependencies ++= Seq(
     "com.codahale.metrics" % "metrics-core" % "3.0.1",
     "com.codahale.metrics" % "metrics-json" % "3.0.1",
