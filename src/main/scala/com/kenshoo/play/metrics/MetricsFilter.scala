@@ -26,13 +26,10 @@ import com.codahale.metrics.MetricRegistry.name
 
 import scala.collection.JavaConverters._
 import play.Logger
-import scala.concurrent.{Promise, ExecutionContext, Future}
-import play.api.libs.iteratee.{Step, Input, Done, Iteratee}
-import play.api.libs.iteratee.Step.Cont
+import scala.concurrent.Future
 
-abstract class MetricsFilter extends EssentialFilter {
+abstract class MetricsFilter extends RecoverFilter {
 
-  self =>
   def registry: MetricRegistry
 
   val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
@@ -61,30 +58,28 @@ abstract class MetricsFilter extends EssentialFilter {
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
   def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
 
-   def apply(next: EssentialAction) = new EssentialAction {
-     def apply(rh: RequestHeader): Iteratee[Array[Byte], SimpleResult] = {
-      val context = requestsTimer.time()
+  override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
 
-      // Force instantiation of meters
-      otherStatuses
-      statusLevelMeters
-      statusCodes
+    val context = requestsTimer.time()
+    // Force instantiation of meters
+    otherStatuses
+    statusLevelMeters
+    statusCodes
 
-      def logCompleted(result: SimpleResult): SimpleResult = {
-        activeRequests.dec()
-        context.stop()
-        statusCodes.getOrElse(result.header.status, otherStatuses).mark()
-        statusLevelMeters.get(statusLevel(result.header.status)).map(_.mark)
-        result
-      }
-
-      activeRequests.inc()
-      next(rh).recover {
-        case t: Throwable =>
-          Logger.error(s" Got an error: $t")
-          Results.InternalServerError
-      }.map(logCompleted)
+    def logCompleted(result: SimpleResult): SimpleResult = {
+      activeRequests.dec()
+      context.stop()
+      statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+      statusLevelMeters.get(statusLevel(result.header.status)).map(_.mark)
+      result
     }
+
+    activeRequests.inc()
+    next(rh).recover {
+      case t: Throwable =>
+        Logger.error(s"Unhandled exception: ${t.getMessage}", t)
+        Results.InternalServerError
+    }.map(logCompleted)
   }
 
   /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
@@ -102,44 +97,8 @@ abstract class MetricsFilter extends EssentialFilter {
   private def newMeter(meterName: String): Meter = {
     registry.meter(name(classOf[MetricsFilter], meterName))
   }
-
-
-  implicit class IterateeWithRecover[E, A](underlying: Iteratee[E, A]) {
-
-    def recover[B >: A](pf: PartialFunction[Throwable, B])(implicit ec: ExecutionContext): Iteratee[E, B] = {
-      recoverM { case t: Throwable => Future.successful(pf(t)) }(ec)
-    }
-
-    def recoverM[B >: A](pf: PartialFunction[Throwable, Future[B]])(implicit ec: ExecutionContext): Iteratee[E, B] = {
-      val pec = ec.prepare()
-
-      def handleErrorMsg(msg: String): Iteratee[E, B] = handleError(new RuntimeException(msg))
-      def handleError(t: Throwable): Iteratee[E, B] = Iteratee.flatten(pf(t).map(b => Done[E, B](b))(ec))
-
-      def step(it: Iteratee[E, A])(input: Input[E]): Iteratee[E, B] = {
-        val nextIt = it.pureFlatFold[E, B] {
-          case Step.Cont(k) =>
-            val n = k(input)
-            n.pureFlatFold {
-              case Step.Error(msg, _) => handleErrorMsg(msg)
-              case other => other.it
-            }(ec)
-          case Step.Error(msg, _) => handleErrorMsg(msg)
-          case other => other.it
-        }(ec)
-
-        Iteratee.flatten(
-          nextIt.unflatten
-            .map(_.it)(ec)
-            .recover { case t: Throwable => handleError(t) }(pec)
-        )
-      }
-      Cont(step(underlying)).it
-    }
-  }
 }
 
 object MetricsFilter extends MetricsFilter {
   def registry = MetricsRegistry.default
 }
-
