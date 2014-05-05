@@ -77,7 +77,7 @@ abstract class MetricsFilter extends RecoverFilter {
       activeRequests.inc()
       next(rh).recover {
         case t: Throwable =>
-          Logger.error(s" Got an error: $t")
+          Logger.error(s"Unhandled exception: ${t.getMessage}", t)
           Results.InternalServerError
       }.map(logCompleted)
   }
@@ -102,3 +102,4 @@ abstract class MetricsFilter extends RecoverFilter {
 object MetricsFilter extends MetricsFilter {
   def registry = MetricsRegistry.default
 }
+
