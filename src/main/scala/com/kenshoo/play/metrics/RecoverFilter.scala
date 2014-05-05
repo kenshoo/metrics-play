@@ -4,7 +4,6 @@ import play.api.mvc._
 import play.api.libs.iteratee.{Step, Input, Done, Iteratee}
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import play.api.libs.iteratee.Step.Cont
-import play.api.mvc.SimpleResult
 
 // grabbed this solution from
 // https://github.com/playframework/playframework/issues/2401
