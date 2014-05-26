@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "0.1.5"
+    "com.kenshoo" %% "metrics-play" % "0.1.6"
     )
 ```
 
@@ -67,7 +67,7 @@ Some configuration is supported through the default configuration file:
 
     metrics.knownStatuses - [list of Ints] (default is [200, 400, 403, 404, 201, 307, 500]) 
     
-    metrics.excludedRoutes - [list of Strings] (default is empty) - regular expressions of routes that should not be measured.
+    metrics.excludedRoutes - [list of Strings] (default is empty) - regular expressions of routes that should not be measured, e.g. ["\/admin\/.*"]  (default is empty).
 
 ### Metrics Filter
 
