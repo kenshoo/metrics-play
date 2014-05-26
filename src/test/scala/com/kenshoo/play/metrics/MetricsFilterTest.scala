@@ -24,7 +24,6 @@ import play.api.test.FakeApplication
 import scala.Some
 import scala.collection.JavaConversions._
 
-
 class MetricsFilterSpec extends Specification {
   sequential
 
@@ -52,6 +51,13 @@ class MetricsFilterSpec extends Specification {
       val result = route(FakeRequest("GET", "/")).get
       status(result) must equalTo(INTERNAL_SERVER_ERROR)
     }
+
+    "request timer does not increment" in new ApplicationWithExcludedRoutes() {
+      route(FakeRequest("GET", "/")).get
+      val timer = registry.timer(MetricRegistry.name(classOf[MetricsFilter], "requestTimer"))
+      timer.getCount must beEqualTo(0)
+    }
+
   }
 
   class MockGlobal(val reg: MetricRegistry) extends WithFilters(new MetricsFilter{
@@ -81,6 +87,13 @@ class MetricsFilterSpec extends Specification {
   abstract class ApplicationWithFilter(val registry: MetricRegistry = new MetricRegistry) extends WithApplication(FakeApplication(withGlobal = Some(new MockGlobal(registry)),
     additionalPlugins = Seq("com.kenshoo.play.metrics.MetricsPlugin"),
     additionalConfiguration = Map("metrics.jvm" -> false)))
+
+  abstract class ApplicationWithExcludedRoutes(val registry: MetricRegistry = new MetricRegistry) extends WithApplication(
+    FakeApplication(withGlobal = Some(new MockGlobal(registry)),
+    additionalPlugins = Seq("com.kenshoo.play.metrics.MetricsPlugin"),
+    additionalConfiguration = Map("metrics.jvm" -> false, "metrics.excludedRoutes.0" -> "\\/.*")
+                    )
+  )
 
   abstract class ApplicationWithFilterWithException(val registry: MetricRegistry = new MetricRegistry)
     extends WithApplication(FakeApplication(withGlobal = Some(new MockGlobalWithException(registry)),

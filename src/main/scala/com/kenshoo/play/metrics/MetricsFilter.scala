@@ -25,6 +25,7 @@ import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
 
 import scala.collection.JavaConverters._
+import collection.JavaConversions._
 import play.Logger
 import scala.concurrent.Future
 
@@ -60,6 +61,16 @@ abstract class MetricsFilter extends RecoverFilter {
 
   override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
 
+    val optList:Option[List[String]] = Play.current.configuration.getStringList("metrics.excludedRoutes").map(_.toList)
+    val excludeRoutes = optList.getOrElse(List[String]())
+    if (excludeRoutes.exists(x => rh.uri.matches(x))) {
+      next(rh).recover {
+        case t: Throwable =>
+          Logger.error(s"Unhandled exception: ${t.getMessage}", t)
+          Results.InternalServerError
+      }
+    }
+    else {
       val context = requestsTimer.time()
       // Force instantiation of meters
       otherStatuses
@@ -80,6 +91,7 @@ abstract class MetricsFilter extends RecoverFilter {
           Logger.error(s"Unhandled exception: ${t.getMessage}", t)
           Results.InternalServerError
       }.map(logCompleted)
+    }
   }
 
   /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
@@ -102,4 +114,3 @@ abstract class MetricsFilter extends RecoverFilter {
 object MetricsFilter extends MetricsFilter {
   def registry = MetricsRegistry.default
 }
-

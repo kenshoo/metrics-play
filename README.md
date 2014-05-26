@@ -66,6 +66,8 @@ Some configuration is supported through the default configuration file:
     metrics.showHttpStatusLevels - [true/false] (default is false)
 
     metrics.knownStatuses - [list of Ints] (default is [200, 400, 403, 404, 201, 307, 500]) 
+    
+    metrics.excludedRoutes - [list of Strings] (default is empty) - regular expressions of routes that should not be measured.
 
 ### Metrics Filter
 
