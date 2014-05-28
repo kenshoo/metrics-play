@@ -25,6 +25,7 @@ import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
 
 import scala.collection.JavaConverters._
+import collection.JavaConversions._
 import play.Logger
 import scala.concurrent.Future
 
@@ -57,9 +58,25 @@ abstract class MetricsFilter extends RecoverFilter {
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
   def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
+  def excludedRoutes: Counter = registry.counter(name(classOf[MetricsFilter], "excludedRoutes"))
 
   override def apply(next: (RequestHeader) => Future[SimpleResult])(rh: RequestHeader): Future[SimpleResult] = {
 
+    def nextRecover : Future[SimpleResult] = {
+      next(rh).recover {
+        case t: Throwable =>
+          Logger.error(s"Unhandled exception: ${t.getMessage}", t)
+          Results.InternalServerError
+      }
+    }
+
+    val optList:Option[List[String]] = Play.current.configuration.getStringList("metrics.excludedRoutes").map(_.toList)
+    val excludeRoutes = optList.getOrElse(List[String]())
+    if (excludeRoutes.exists(x => rh.uri.matches(x))) {
+      excludedRoutes.inc()
+      nextRecover
+    }
+    else {
       val context = requestsTimer.time()
       // Force instantiation of meters
       otherStatuses
@@ -75,12 +92,10 @@ abstract class MetricsFilter extends RecoverFilter {
       }
 
       activeRequests.inc()
-      next(rh).recover {
-        case t: Throwable =>
-          Logger.error(s"Unhandled exception: ${t.getMessage}", t)
-          Results.InternalServerError
-      }.map(logCompleted)
+      nextRecover.map(logCompleted)
+    }
   }
+
 
   /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
   private def statusLevelName(s: Int): String = {
@@ -102,4 +117,3 @@ abstract class MetricsFilter extends RecoverFilter {
 object MetricsFilter extends MetricsFilter {
   def registry = MetricsRegistry.default
 }
-
