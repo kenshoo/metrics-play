@@ -8,6 +8,8 @@ scalaVersion := "2.10.2"
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
+resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+
 libraryDependencies ++= Seq(
     "com.codahale.metrics" % "metrics-core" % "3.0.1",
     "com.codahale.metrics" % "metrics-json" % "3.0.1",
