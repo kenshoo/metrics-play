@@ -40,7 +40,7 @@ abstract class MetricsFilter extends EssentialFilter {
     def apply(rh: RequestHeader) = {
       val context = requestsTimer.time()
 
-      def logCompleted(result: SimpleResult): SimpleResult = {
+      def logCompleted(result: Result): Result = {
         activeRequests.dec()
         context.stop()
         statusCodes.getOrElse(result.header.status, otherStatuses).mark()
