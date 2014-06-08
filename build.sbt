@@ -6,6 +6,8 @@ version := "2.3.0_0.1.5"
 
 scalaVersion := "2.10.2"
 
+crossScalaVersions := Seq("2.10.2", "2.11.1")
+
 testOptions in Test += Tests.Argument("junitxml", "console")
 
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
@@ -17,7 +19,7 @@ libraryDependencies ++= Seq(
     "com.typesafe.play" %% "play" % "2.3.0" % "provided",
     //test
     "com.typesafe.play" %% "play-test" % "2.3.0" % "test",
-    "org.specs2" % "specs2_2.10" % "1.13" % "test",
+    "org.specs2" %% "specs2" % "2.3.12" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test"
 )
 
