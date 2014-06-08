@@ -2,7 +2,7 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-version := "2.3.0_0.1.5"
+version := "2.3.0_0.1.6"
 
 scalaVersion := "2.10.2"
 
