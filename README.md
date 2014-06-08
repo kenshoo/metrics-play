@@ -4,7 +4,7 @@ This module provides some support for @codahale [Metrics](http://metrics.codahal
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
-Play Version: 2.3.0, Metrics Version: 3.0.1, Scala Version: 2.10.2
+Play Version: 2.3.0, Metrics Version: 3.0.1, Scala Versions: 2.10.2, 2.11.1
 
 ## Features
 
@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "0.1.5"
+    "com.kenshoo" %% "metrics-play" % "0.1.6"
     )
 ```
 
