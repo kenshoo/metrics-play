@@ -43,6 +43,7 @@ class MetricsPlugin(val app: Application) extends Plugin {
   def rateUnit     = app.configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
   def durationUnit = app.configuration.getString("metrics.durationUnit", validUnits).getOrElse("SECONDS")
   def showSamples  = app.configuration.getBoolean("metrics.showSamples").getOrElse(false)
+  def showLevels   = app.configuration.getBoolean("metrics.showHttpStatusLevels").getOrElse(false)
 
   implicit def stringToTimeUnit(s: String) : TimeUnit = TimeUnit.valueOf(s)
 
@@ -57,6 +58,7 @@ class MetricsPlugin(val app: Application) extends Plugin {
       }
       val module = new MetricsModule(rateUnit, durationUnit, showSamples)
       mapper.registerModule(module)
+      MetricsFilter.showLevels = showLevels
     }
   }
 
