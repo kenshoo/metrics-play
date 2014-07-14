@@ -32,6 +32,14 @@ abstract class MetricsFilter extends EssentialFilter {
 
   def statusCodes: Map[Int, Meter] = knownStatuses.map (s => s -> registry.meter(name(classOf[MetricsFilter], s.toString))).toMap
 
+  lazy val statusLevelMeters: Map[Int, Meter] = {
+    if (MetricsFilter.showLevels) {
+      val buckets = 1 to 5
+      newMeters(buckets, buckets.map(x => statusLevelName(x)))
+    } else Map()
+  }
+
+
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
   def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
@@ -44,6 +52,7 @@ abstract class MetricsFilter extends EssentialFilter {
         activeRequests.dec()
         context.stop()
         statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+        statusLevelMeters.get(statusLevel(result.header.status)).map(_.mark)
         result
       }
 
@@ -51,8 +60,27 @@ abstract class MetricsFilter extends EssentialFilter {
       next(rh).map(logCompleted)
     }
   }
+
+
+  /** The name of the status level of an HTTP status code (e.g., "2xx", "5xx") */
+  private def statusLevelName(s: Int): String = {
+    s + "xx"
+  }
+
+  private def statusLevel(s: Int) = s / 100
+
+  private def newMeters(keys: Seq[Int], names: Seq[String]): Map[Int, Meter] = {
+    keys.zip(names.map(name => newMeter(name))).toMap
+  }
+
+  /** Creates a new meter with the specified name */
+  private def newMeter(meterName: String): Meter = {
+    registry.meter(name(classOf[MetricsFilter], meterName))
+  }
 }
 
 object MetricsFilter extends MetricsFilter {
   def registry = MetricsRegistry.default
+
+  var showLevels = false
 }
