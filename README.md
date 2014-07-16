@@ -62,18 +62,31 @@ Some configuration is supported through the default configuration file:
     metrics.showSamples [true/false] (default is false)
 
     metrics.jvm - [true/false] (default is true)
-
+    
+    metrics.showHttpStatusLevels - [true/false] (default is false)
+    
+    metrics.knownStatuses - [list of Ints] (default is [200, 400, 403, 404, 201, 307, 500])
+    
+    metrics.excludedRoutes - [list of Strings] - regular expressions of routes that should not be measured, e.g. ["\/admin\/.*"]  (default is empty)
+    
 ### Metrics Filter
 
 An implementation of the Metrics' instrumenting filter for Play2. It records requests duration, number of active requests and counts each return code
 
-
+In scala:
 ```scala
     import com.kenshoo.play.metrics.MetricsFilter
     import play.api.mvc._
 
     object Global extends WithFilters(MetricsFilter)
 ```
-
+In java:
+```java
+    public class Global extends GlobalSettings {
+        @Override
+        public <T extends EssentialFilter> Class<T>[] filters() {
+            return (Class<T>[]) new Class[]{MetricsFilter.class};
+    }
+```
 ## License
 This code is released under the Apache Public License 2.0.
