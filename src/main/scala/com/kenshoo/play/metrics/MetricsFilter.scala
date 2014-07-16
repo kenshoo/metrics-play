@@ -25,6 +25,7 @@ import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
 
 import scala.collection.JavaConverters._
+import collection.JavaConversions._
 
 abstract class MetricsFilter extends EssentialFilter {
 
@@ -55,21 +56,34 @@ abstract class MetricsFilter extends EssentialFilter {
   def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
   def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
+  def excludedRoutes: Counter = registry.counter(name(classOf[MetricsFilter], "excludedRoutes"))
 
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
-      val context = requestsTimer.time()
-
-      def logCompleted(result: SimpleResult): SimpleResult = {
-        activeRequests.dec()
-        context.stop()
-        statusCodes.getOrElse(result.header.status, otherStatuses).mark()
-        statusLevelMeters.get(statusLevel(result.header.status)).map(_.mark)
-        result
+      val optList: Option[List[String]] = Play.current.configuration.getStringList("metrics.excludedRoutes").map(_.toList)
+      val excludeRoutes = optList.getOrElse(List[String]())
+      if (excludeRoutes.exists(x => rh.uri.matches(x))) {
+        excludedRoutes.inc()
+        next(rh)
       }
+      else {
+        val context = requestsTimer.time()
+        // Force instantiation of meters
+        otherStatuses
+        statusLevelMeters
+        statusCodes
 
-      activeRequests.inc()
-      next(rh).map(logCompleted)
+        def logCompleted(result: SimpleResult): SimpleResult = {
+          activeRequests.dec()
+          context.stop()
+          statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+          statusLevelMeters.get(statusLevel(result.header.status)).map(_.mark)
+          result
+        }
+
+        activeRequests.inc()
+        next(rh).map(logCompleted)
+      }
     }
   }
 
