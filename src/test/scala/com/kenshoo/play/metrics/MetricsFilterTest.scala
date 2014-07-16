@@ -53,6 +53,11 @@ class MetricsFilterSpec extends Specification {
       val timer = registry.timer(MetricRegistry.name(classOf[MetricsFilter], "requestTimer"))
       timer.getCount must beEqualTo(0)
     }
+
+    "return 500 response code" in new ApplicationWithFilterWithException {
+      val result = route(FakeRequest("GET", "/")).get
+      status(result) must equalTo(INTERNAL_SERVER_ERROR)
+    }
   }
 
   class MockGlobal(val reg: MetricRegistry) extends WithFilters(new MetricsFilter{
@@ -66,6 +71,17 @@ class MetricsFilterSpec extends Specification {
     }
   }
 
+  class MockGlobalWithException(val reg: MetricRegistry) extends WithFilters(new MetricsFilter{
+    val registry: MetricRegistry = reg
+  }) {
+    def handler = Action {
+      throw new NullPointerException
+      Results.Ok("ok")
+    }
+    override def onRouteRequest(request: RequestHeader): Option[Handler] = {
+      Some(handler)
+    }
+  }
 
   abstract class ApplicationWithFilter(val registry: MetricRegistry = new MetricRegistry) extends WithApplication(FakeApplication(withGlobal = Some(new MockGlobal(registry)),
     additionalPlugins = Seq("com.kenshoo.play.metrics.MetricsPlugin"),
@@ -78,4 +94,8 @@ class MetricsFilterSpec extends Specification {
     )
   )
 
+  abstract class ApplicationWithFilterWithException(val registry: MetricRegistry = new MetricRegistry)
+    extends WithApplication(FakeApplication(withGlobal = Some(new MockGlobalWithException(registry)),
+      additionalPlugins = Seq("com.kenshoo.play.metrics.MetricsPlugin"),
+      additionalConfiguration = Map("metrics.jvm" -> false)))
 }

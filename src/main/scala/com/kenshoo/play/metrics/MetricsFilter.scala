@@ -15,6 +15,7 @@
 */
 package com.kenshoo.play.metrics
 
+import play.Logger
 import play.api.mvc._
 import play.api.http.Status
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -60,11 +61,20 @@ abstract class MetricsFilter extends EssentialFilter {
 
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
+
+      def nextRecover = {
+        next(rh).recover {
+          case t: Throwable =>
+            Logger.error(s"Unhandled exception: ${t.getMessage}", t)
+            Results.InternalServerError
+        }
+      }
+
       val optList: Option[List[String]] = Play.current.configuration.getStringList("metrics.excludedRoutes").map(_.toList)
       val excludeRoutes = optList.getOrElse(List[String]())
       if (excludeRoutes.exists(x => rh.uri.matches(x))) {
         excludedRoutes.inc()
-        next(rh)
+        nextRecover
       }
       else {
         val context = requestsTimer.time()
@@ -82,7 +92,7 @@ abstract class MetricsFilter extends EssentialFilter {
         }
 
         activeRequests.inc()
-        next(rh).map(logCompleted)
+        nextRecover.map(logCompleted)
       }
     }
   }
