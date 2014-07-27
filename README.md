@@ -46,7 +46,7 @@ where priority is the priority of this plugin with respect to other plugins.
 
 An implementation of the [metrics-servlet](http://metrics.codahale.com/manual/servlets/) as a play2 controller.
 
-It xports all registered metrics as a json document.
+It exports all registered metrics as a json document.
 
 To enable the controller add a mapping to conf/routes file
 
