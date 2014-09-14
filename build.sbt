@@ -4,8 +4,9 @@ name := "metrics-play"
 
 version := "2.3.0_0.1.7"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.10.2"
 
+crossScalaVersions := Seq("2.10.2", "2.11.1")
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
