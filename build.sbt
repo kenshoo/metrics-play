@@ -2,11 +2,10 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-version := "2.3.0_0.1.6"
+version := "2.3.0_0.1.7"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.11.1"
 
-crossScalaVersions := Seq("2.10.2", "2.11.1")
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
@@ -17,6 +16,7 @@ libraryDependencies ++= Seq(
     "com.codahale.metrics" % "metrics-json" % "3.0.1",
     "com.codahale.metrics" % "metrics-jvm" % "3.0.1",
     "com.typesafe.play" %% "play" % "2.3.0" % "provided",
+    "com.google.inject" % "guice" % "3.0" % "provided",
     //test
     "com.typesafe.play" %% "play-test" % "2.3.0" % "test",
     "org.specs2" %% "specs2" % "2.3.12" % "test",
