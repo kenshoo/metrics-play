@@ -17,7 +17,9 @@ package com.kenshoo.play.metrics
 
 import java.util.concurrent.TimeUnit
 
-import play.api.{Application, Play, Plugin}
+import ch.qos.logback.classic
+import com.codahale.metrics.logback.InstrumentedAppender
+import play.api.{Logger, Application, Play, Plugin}
 
 import com.codahale.metrics.{MetricRegistry, SharedMetricRegistries}
 import com.codahale.metrics.json.MetricsModule
@@ -54,6 +56,17 @@ class MetricsPlugin(val app: Application) extends Plugin {
         registry.registerAll(new GarbageCollectorMetricSet())
         registry.registerAll(new MemoryUsageGaugeSet())
         registry.registerAll(new ThreadStatesGaugeSet())
+      }
+      val logbackEnabled = app.configuration.getBoolean("metrics.logback").getOrElse(true)
+      if (logbackEnabled) {
+        val appender: InstrumentedAppender = new InstrumentedAppender(registry)
+
+        val logger: classic.Logger = Logger.logger.asInstanceOf[classic.Logger]
+        appender.setContext(logger.getLoggerContext)
+        appender.start()
+        logger.addAppender(appender)
+
+
       }
       val module = new MetricsModule(rateUnit, durationUnit, showSamples)
       mapper.registerModule(module)
