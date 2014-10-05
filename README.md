@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.6"
+    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.7"
     )
 ```
 
@@ -61,7 +61,9 @@ Some configuration is supported through the default configuration file:
 
     metrics.showSamples [true/false] (default is false)
 
-    metrics.jvm - [true/false] (default is true)
+    metrics.jvm - [true/false] (default is true) controls reporting jvm metrics
+  
+    metrics.logback - [true/false] (default is true) controls reporing logback metrics
 
 ### Metrics Filter
 
