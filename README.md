@@ -4,7 +4,7 @@ This module provides some support for @codahale [Metrics](http://metrics.codahal
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
-Play Version: 2.3.0, Metrics Version: 3.0.1, Scala Versions: 2.10.2, 2.11.1
+Play Version: 2.3.4, Metrics Version: 3.0.1, Scala Versions: 2.10.4, 2.11.2
 
 ## Features
 
