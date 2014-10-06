@@ -13,10 +13,10 @@ testOptions in Test += Tests.Argument("junitxml", "console")
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= Seq(
-    "com.codahale.metrics" % "metrics-core" % "3.0.1",
-    "com.codahale.metrics" % "metrics-json" % "3.0.1",
-    "com.codahale.metrics" % "metrics-jvm" % "3.0.1",
-  "com.codahale.metrics" % "metrics-logback" % "3.0.1",
+    "io.dropwizard.metrics" % "metrics-core" % "3.1.0",
+    "io.dropwizard.metrics" % "metrics-json" % "3.1.0",
+    "io.dropwizard.metrics" % "metrics-jvm" % "3.1.0",
+    "io.dropwizard.metrics" % "metrics-logback" % "3.1.0",
     "com.typesafe.play" %% "play" % "2.3.4" % "provided",
     //test
     "com.typesafe.play" %% "play-test" % "2.3.4" % "test",

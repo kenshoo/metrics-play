@@ -1,10 +1,10 @@
 # metrics-play
 
-This module provides some support for @codahale [Metrics](http://metrics.codahale.com/) library in a Play2 application (Scala)
+This module provides some support for @codahale [Metrics](https://dropwizard.github.io/metrics/3.1.0/) library in a Play2 application (Scala)
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
-Play Version: 2.3.4, Metrics Version: 3.0.1, Scala Versions: 2.10.4, 2.11.2
+Play Version: 2.3.4, Metrics Version: 3.1.0, Scala Versions: 2.10.4, 2.11.2
 
 ## Features
 
