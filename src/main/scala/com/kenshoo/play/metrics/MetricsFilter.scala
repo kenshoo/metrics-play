@@ -25,8 +25,31 @@ import com.codahale.metrics.MetricRegistry.name
 
 abstract class MetricsFilter extends EssentialFilter {
   def registry: MetricRegistry
+
+  /** Specify a meaningful prefix for metrics
+    *
+    * Defaults to classOf[MetricsFilter].getName for backward compatibility as
+    * this was the original set value.
+    *
+    */
   def label: String = classOf[MetricsFilter].getName
+
+  /** Specify URIs as monitoring checks
+    *
+    * Enables monitoring requests to be classified separately to regular traffic
+    * in order to ensure that metrics are not inadvertently skewed.
+    *
+    * Defaults to an empty sequence to maintain backward compatibility.
+    */
   def healthChecks: Seq[String] = Seq.empty
+
+  /** Specify which HTTP status codes have individual metrics
+    *
+    * Statuses not specified here are grouped together under otherStatuses
+    *
+    * Defaults to 200, 400, 403, 404, 201, 307, 500 to maintain compatibility
+    * with prior releases.
+    */
   def knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
     Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
 
