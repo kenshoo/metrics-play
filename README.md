@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.7"
+    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.8"
     )
 ```
 
@@ -38,7 +38,7 @@ where priority is the priority of this plugin with respect to other plugins.
      import com.kenshoo.play.metrics.MetricsRegistry
      import com.codahale.metrics.Counter
 
-     val counter = MetricsRegistry.default.counter("name")
+     val counter = MetricsRegistry.defaultRegistry.counter("name")
      counter.inc()
 ````
 
@@ -76,6 +76,26 @@ An implementation of the Metrics' instrumenting filter for Play2. It records req
 
     object Global extends WithFilters(MetricsFilter)
 ```
+
+ Note - to use the filter in play java, replace MetricsFilter class with JavaMetricsFilter
+
+ ```java
+    import com.kenshoo.play.metrics.JavaMetricsFilter;
+    import play.GlobalSettings;
+    import play.api.mvc.EssentialFilter;
+    
+    public class Global extends GlobalSettings {
+        @Override
+        public <T extends EssentialFilter> Class<T>[] filters() {
+    
+            return new Class[]{JavaMetricsFilter.class};
+        }
+    }
+ ```
+
+## Changes
+
+2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
 
 ## License
 This code is released under the Apache Public License 2.0.
