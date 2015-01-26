@@ -22,8 +22,7 @@ import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
 
 
-
-abstract class MetricsFilter extends EssentialFilter {
+trait MetricsFilter extends EssentialFilter {
   def registry: MetricRegistry
 
   /** Specify a meaningful prefix for metrics
@@ -84,7 +83,13 @@ abstract class MetricsFilter extends EssentialFilter {
   }
 }
 
+/**
+ * use this filter when writing play java. bypasses the no ctor problem of scala object
+ */
+class JavaMetricsFilter extends MetricsFilter {
+  override def registry: MetricRegistry = MetricsRegistry.defaultRegistry
+}
 
 object MetricsFilter extends MetricsFilter {
-  def registry = MetricsRegistry.default
+  override def registry = MetricsRegistry.defaultRegistry
 }
