@@ -111,6 +111,7 @@ Configuration can optionally be overridden through subclassing MetricsFilter in 
 
 ## Changes
 
+2.3.0_0.1.9 - Support configuration of which HTTP statuses have metrics, and allow service checks to be counted seperately
 2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
 
 ## License
