@@ -93,8 +93,25 @@ An implementation of the Metrics' instrumenting filter for Play2. It records req
     }
  ```
 
+#### Configuration
+
+Configuration can optionally be overridden through subclassing MetricsFilter in order to change the prefix label for created metrics, to specify which HTTP Status codes should have individual metrics, and to classify URIs as healthchecks, for those to be counted seperately.
+
+```scala
+    import com.kenshoo.play.metrics.{MetricsRegistry, MetricsFilter}
+    import play.api.mvc._
+
+    class Global(val reg: MetricRegistry) extends WithFilters(new MetricsFilter{
+      val registry: MetricRegistry = reg
+      override val healthChecks: Seq[String] = Seq("/ok")
+      override val knownStatuses: Seq[Int] = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND, Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
+      override val label: String = classOf[MetricsFilter].getName
+    })
+```
+
 ## Changes
 
+2.3.0_0.1.9 - Support configuration of which HTTP statuses have metrics, and allow service checks to be counted seperately
 2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
 
 ## License
