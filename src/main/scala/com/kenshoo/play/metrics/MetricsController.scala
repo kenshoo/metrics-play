@@ -52,6 +52,6 @@ trait MetricsController {
 }
 
 object MetricsController extends Controller with MetricsController {
-  def registry = MetricsRegistry.defaultRegistry
+  def registry = MetricsRegistry.default
   def app = Play.current
 }

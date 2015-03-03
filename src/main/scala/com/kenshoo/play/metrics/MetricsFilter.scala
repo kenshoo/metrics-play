@@ -79,9 +79,9 @@ trait MetricsFilter extends EssentialFilter {
  * use this filter when writing play java. bypasses the no ctor problem of scala object
  */
 class JavaMetricsFilter extends MetricsFilter {
-  override def registry: MetricRegistry = MetricsRegistry.defaultRegistry
+  override def registry: MetricRegistry = MetricsRegistry.default
 }
 
 object MetricsFilter extends MetricsFilter {
-  override def registry = MetricsRegistry.defaultRegistry
+  override def registry = MetricsRegistry.default
 }
