@@ -36,7 +36,7 @@ class MetricsFilterSpec extends Specification {
 
     "increment status code counter" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
-      val meter: Meter = registry.meter(MetricRegistry.name(classOf[MetricsFilter], "200"))
+      val meter: Meter = registry.meter(s"status.${MetricRegistry.name(classOf[MetricsFilter], "200")}")
       val meters: Map[String, Meter] = registry.getMeters.toMap
       meters.foreach(m => println(m._1 +": " + m._2.getCount))
       meter.getCount must equalTo(1)
@@ -44,7 +44,7 @@ class MetricsFilterSpec extends Specification {
 
     "increment request timer" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
-      val timer = registry.timer(MetricRegistry.name(classOf[MetricsFilter], "requestTimer"))
+      val timer = registry.timer(s"latency.${MetricRegistry.name(classOf[MetricsFilter])}")
       timer.getCount must beGreaterThan(0l)
     }
   }
