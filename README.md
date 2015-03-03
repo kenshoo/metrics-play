@@ -1,10 +1,10 @@
 # metrics-play
 
-This module provides some support for @codahale [Metrics](http://metrics.codahale.com/) library in a Play2 application (Scala)
+This module provides some support for @codahale [Metrics](https://dropwizard.github.io/metrics/3.1.0/) library in a Play2 application (Scala)
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
-Play Version: 2.2.2, Metrics Version: 3.0.1, Scala Version: 2.10.0
+Play Version: 2.3.4, Metrics Version: 3.1.0, Scala Versions: 2.10.4, 2.11.2
 
 ## Features
 
@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "0.1.4"
+    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.8"
     )
 ```
 
@@ -38,7 +38,7 @@ where priority is the priority of this plugin with respect to other plugins.
      import com.kenshoo.play.metrics.MetricsRegistry
      import com.codahale.metrics.Counter
 
-     val counter = MetricsRegistry.default.counter("name")
+     val counter = MetricsRegistry.defaultRegistry.counter("name")
      counter.inc()
 ````
 
@@ -46,7 +46,7 @@ where priority is the priority of this plugin with respect to other plugins.
 
 An implementation of the [metrics-servlet](http://metrics.codahale.com/manual/servlets/) as a play2 controller.
 
-It xports all registered metrics as a json document.
+It exports all registered metrics as a json document.
 
 To enable the controller add a mapping to conf/routes file
 
@@ -61,7 +61,9 @@ Some configuration is supported through the default configuration file:
 
     metrics.showSamples [true/false] (default is false)
 
-    metrics.jvm - [true/false] (default is true)
+    metrics.jvm - [true/false] (default is true) controls reporting jvm metrics
+  
+    metrics.logback - [true/false] (default is true) controls reporing logback metrics
 
 ### Metrics Filter
 
@@ -74,6 +76,26 @@ An implementation of the Metrics' instrumenting filter for Play2. It records req
 
     object Global extends WithFilters(MetricsFilter)
 ```
+
+ Note - to use the filter in play java, replace MetricsFilter class with JavaMetricsFilter
+
+ ```java
+    import com.kenshoo.play.metrics.JavaMetricsFilter;
+    import play.GlobalSettings;
+    import play.api.mvc.EssentialFilter;
+    
+    public class Global extends GlobalSettings {
+        @Override
+        public <T extends EssentialFilter> Class<T>[] filters() {
+    
+            return new Class[]{JavaMetricsFilter.class};
+        }
+    }
+ ```
+
+## Changes
+
+2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
 
 ## License
 This code is released under the Apache Public License 2.0.

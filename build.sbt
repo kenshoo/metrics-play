@@ -2,20 +2,25 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-version := "2.3.0_0.1.5"
+version := "2.3.0_0.1.8"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.11.2"
+
+crossScalaVersions := Seq("2.10.4", "2.11.2")
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
+resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+
 libraryDependencies ++= Seq(
-    "com.codahale.metrics" % "metrics-core" % "3.0.1",
-    "com.codahale.metrics" % "metrics-json" % "3.0.1",
-    "com.codahale.metrics" % "metrics-jvm" % "3.0.1",
-    "com.typesafe.play" %% "play" % "2.3.0" % "provided",
+    "io.dropwizard.metrics" % "metrics-core" % "3.1.0",
+    "io.dropwizard.metrics" % "metrics-json" % "3.1.0",
+    "io.dropwizard.metrics" % "metrics-jvm" % "3.1.0",
+    "io.dropwizard.metrics" % "metrics-logback" % "3.1.0",
+    "com.typesafe.play" %% "play" % "2.3.4" % "provided",
     //test
-    "com.typesafe.play" %% "play-test" % "2.3.0" % "test",
-    "org.specs2" % "specs2_2.10" % "1.13" % "test",
+    "com.typesafe.play" %% "play-test" % "2.3.4" % "test",
+    "org.specs2" %% "specs2" % "2.3.12" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test"
 )
 

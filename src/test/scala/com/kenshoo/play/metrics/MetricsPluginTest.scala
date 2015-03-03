@@ -61,11 +61,19 @@ class MetricsPluginSpec extends Specification with Mockito with BeforeAfterExamp
       val metrics: Map[String, Metric] = SharedMetricRegistries.getOrCreate("default").getMetrics
       metrics must haveKey("heap.usage")
     }
+
+    "registers logback metrics" in {
+      val plugin = config(logback = Some(true))
+      plugin.onStart()
+      val metrics: Map[String, Metric] = SharedMetricRegistries.getOrCreate("default").getMetrics
+      metrics must haveKey("ch.qos.logback.core.Appender.info")
+    }
   }
 
   def config(enabled: Option[Boolean] = Option.empty,
              name: Option[String] = Option.empty,
-             jvm: Option[Boolean] = Option.empty): MetricsPlugin = {
+             jvm: Option[Boolean] = Option.empty,
+             logback: Option[Boolean] = Option.empty): MetricsPlugin = {
     val app = mock[Application]
     val config = mock[Configuration]
     app.configuration returns config
@@ -73,6 +81,7 @@ class MetricsPluginSpec extends Specification with Mockito with BeforeAfterExamp
     config.getBoolean("metrics.enabled") returns enabled
     config.getString("metrics.name") returns name
     config.getBoolean("metrics.jvm") returns jvm
+    config.getBoolean("metrics.logback") returns logback
     config.getBoolean("metrics.showSamples") returns Option.empty
     new MetricsPlugin(app)
   }

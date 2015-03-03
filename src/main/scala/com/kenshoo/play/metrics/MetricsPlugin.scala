@@ -17,7 +17,9 @@ package com.kenshoo.play.metrics
 
 import java.util.concurrent.TimeUnit
 
-import play.api.{Application, Play, Plugin}
+import ch.qos.logback.classic
+import com.codahale.metrics.logback.InstrumentedAppender
+import play.api.{Logger, Application, Play, Plugin}
 
 import com.codahale.metrics.{MetricRegistry, SharedMetricRegistries}
 import com.codahale.metrics.json.MetricsModule
@@ -27,10 +29,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 
 
 object MetricsRegistry {
-  def default = Play.current.plugin[MetricsPlugin] match {
-      case Some(plugin) => SharedMetricRegistries.getOrCreate(plugin.registryName)
-      case None => throw new Exception("metrics plugin is not configured")
+
+  def defaultRegistry = Play.current.plugin[MetricsPlugin] match {
+    case Some(plugin) => SharedMetricRegistries.getOrCreate(plugin.registryName)
+    case None => throw new Exception("metrics plugin is not configured")
   }
+  
+  @deprecated(message = "use defualtRegistry")
+  def default = defaultRegistry
 }
 
 
@@ -40,21 +46,40 @@ class MetricsPlugin(val app: Application) extends Plugin {
   val mapper: ObjectMapper = new ObjectMapper()
 
   def registryName = app.configuration.getString("metrics.name").getOrElse("default")
-  def rateUnit     = app.configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
-  def durationUnit = app.configuration.getString("metrics.durationUnit", validUnits).getOrElse("SECONDS")
-  def showSamples  = app.configuration.getBoolean("metrics.showSamples").getOrElse(false)
 
   implicit def stringToTimeUnit(s: String) : TimeUnit = TimeUnit.valueOf(s)
 
   override def onStart() {
-    if (enabled) {
-      val registry: MetricRegistry = SharedMetricRegistries.getOrCreate(registryName)
+    def setupJvmMetrics(registry: MetricRegistry) {
       val jvmMetricsEnabled = app.configuration.getBoolean("metrics.jvm").getOrElse(true)
       if (jvmMetricsEnabled) {
         registry.registerAll(new GarbageCollectorMetricSet())
         registry.registerAll(new MemoryUsageGaugeSet())
         registry.registerAll(new ThreadStatesGaugeSet())
       }
+    }
+
+    def setupLogbackMetrics(registry: MetricRegistry) = {
+      val logbackEnabled = app.configuration.getBoolean("metrics.logback").getOrElse(true)
+      if (logbackEnabled) {
+        val appender: InstrumentedAppender = new InstrumentedAppender(registry)
+
+        val logger: classic.Logger = Logger.logger.asInstanceOf[classic.Logger]
+        appender.setContext(logger.getLoggerContext)
+        appender.start()
+        logger.addAppender(appender)
+      }
+    }
+
+    if (enabled) {
+      val registry: MetricRegistry = SharedMetricRegistries.getOrCreate(registryName)
+      val rateUnit     = app.configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
+      val durationUnit = app.configuration.getString("metrics.durationUnit", validUnits).getOrElse("SECONDS")
+      val showSamples  = app.configuration.getBoolean("metrics.showSamples").getOrElse(false)
+
+      setupJvmMetrics(registry)
+      setupLogbackMetrics(registry)
+
       val module = new MetricsModule(rateUnit, durationUnit, showSamples)
       mapper.registerModule(module)
     }
