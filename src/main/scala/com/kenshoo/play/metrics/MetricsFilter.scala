@@ -26,7 +26,7 @@ trait MetricsFilter extends EssentialFilter {
 
   def registry: MetricRegistry
 
-  def requests: Meter = registry.meter(name(classOf[MetricsFilter], "requests"))
+  def requestsTimer: Timer = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
 
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
 
@@ -38,15 +38,16 @@ trait MetricsFilter extends EssentialFilter {
       val controller = rh.tags.getOrElse(play.api.Routes.ROUTE_CONTROLLER, getClass.getPackage.getName)
 
       val context = registry.timer(s"latency.$controller.$method").time()
+      val globalCtx = requestsTimer.time()
 
       def logCompleted(result: Result): Result = {
         activeRequests.dec()
         context.stop()
+        globalCtx.stop()
         registry.meter(s"status.$controller.$method.${result.header.status}").mark()
         result
       }
 
-      requests.mark()
       activeRequests.inc()
       next(rh).map(logCompleted)
     }
@@ -57,9 +58,9 @@ trait MetricsFilter extends EssentialFilter {
  * use this filter when writing play java. bypasses the no ctor problem of scala object
  */
 class JavaMetricsFilter extends MetricsFilter {
-  override def registry: MetricRegistry = MetricsRegistry.default
+  override def registry: MetricRegistry = MetricsRegistry.defaultRegistry
 }
 
 object MetricsFilter extends MetricsFilter {
-  override def registry = MetricsRegistry.default
+  override def registry = MetricsRegistry.defaultRegistry
 }

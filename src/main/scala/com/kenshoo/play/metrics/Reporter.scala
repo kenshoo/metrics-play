@@ -19,8 +19,8 @@ object Reporter {
         period <- conf.getInt("period")
         prefix <- conf.getString("prefix")
       } yield () => {
-        Logger.info("Enabling graphite logging")
-        val myname = InetAddress.getLocalHost.getHostName.replace('.', '_')
+        Logger.info("Enabling GraphiteReporter")
+        val myname = InetAddress.getLocalHost.getHostName
         val graphite = new Graphite(new InetSocketAddress(host, port))
         val reporter = GraphiteReporter.forRegistry(registry)
           .prefixedWith(s"app.$myname.$prefix")
@@ -39,6 +39,8 @@ object Reporter {
       period <- conf.getInt("period")
       prefix <- conf.getString("prefix")
     } yield () => {
+      Logger.info("Enabling ConsoleReporter")
+
       ConsoleReporter.forRegistry(registry)
         .convertDurationsTo(TimeUnit.MILLISECONDS)
         .convertRatesTo(TimeUnit.SECONDS)
@@ -54,6 +56,8 @@ object Reporter {
       period <- conf.getInt("period")
       prefix <- conf.getString("prefix")
     } yield () => {
+      Logger.info("Enabling CsvReporter")
+
       CsvReporter.forRegistry(registry)
         .convertDurationsTo(TimeUnit.MILLISECONDS)
         .convertRatesTo(TimeUnit.SECONDS)
