@@ -73,7 +73,9 @@ class MetricsPlugin(val app: Application) extends Plugin {
 
     def setupReporting(conf: Configuration, registry: MetricRegistry) =
       Map(
-        "graphite" -> Reporter.graphite _
+        "graphite" -> Reporter.graphite _,
+        "console" -> Reporter.console _,
+        "csv" -> Reporter.csv _
       ).foreach {
         case (name, fun) =>
           conf.getConfig(name).foreach {

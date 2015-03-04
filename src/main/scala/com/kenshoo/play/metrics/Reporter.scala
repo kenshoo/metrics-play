@@ -1,11 +1,12 @@
 package com.kenshoo.play.metrics
 
+import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.TimeUnit
 
-import com.codahale.metrics.{MetricRegistry, MetricFilter}
 import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
-import play.api.{Logger, Configuration}
+import com.codahale.metrics.{ConsoleReporter, CsvReporter, MetricFilter, MetricRegistry}
+import play.api.{Configuration, Logger}
 
 object Reporter {
 
@@ -31,4 +32,33 @@ object Reporter {
       }
     }.getOrElse(() => Unit)
   }
+
+  def console(conf: Configuration, registry: MetricRegistry) = {
+    for {
+      unit <- conf.getString("unit")
+      period <- conf.getInt("period")
+      prefix <- conf.getString("prefix")
+    } yield () => {
+      ConsoleReporter.forRegistry(registry)
+        .convertDurationsTo(TimeUnit.MILLISECONDS)
+        .convertRatesTo(TimeUnit.SECONDS)
+        .build().start(period, TimeUnit.valueOf(unit))
+    }
+  }.getOrElse(() => Unit)
+
+
+  def csv(conf: Configuration, registry: MetricRegistry) = {
+    for {
+      outputDir <- conf.getString("output")
+      unit <- conf.getString("unit")
+      period <- conf.getInt("period")
+      prefix <- conf.getString("prefix")
+    } yield () => {
+      CsvReporter.forRegistry(registry)
+        .convertDurationsTo(TimeUnit.MILLISECONDS)
+        .convertRatesTo(TimeUnit.SECONDS)
+        .build(new File(outputDir)).start(period, TimeUnit.valueOf(unit))
+    }
+  }.getOrElse(() => Unit)
+
 }
