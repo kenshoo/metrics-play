@@ -26,6 +26,8 @@ trait MetricsFilter extends EssentialFilter {
 
   def registry: MetricRegistry
 
+  def requests: Meter = registry.meter(name(classOf[MetricsFilter], "requests"))
+
   def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
 
   def apply(next: EssentialAction) = new EssentialAction {
@@ -44,6 +46,7 @@ trait MetricsFilter extends EssentialFilter {
         result
       }
 
+      requests.mark()
       activeRequests.inc()
       next(rh).map(logCompleted)
     }
