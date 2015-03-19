@@ -29,7 +29,7 @@ import scala.collection.JavaConversions._
 class MetricsFilterSpec extends Specification {
   sequential
 
-  val label = classOf[MetricsFilter].getName
+  val labelPrefix = classOf[MetricsFilter].getName
 
   "metrics filter" should {
     "return passed response code" in new ApplicationWithFilter {
@@ -39,7 +39,7 @@ class MetricsFilterSpec extends Specification {
 
     "increment status code counter" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
-      val meter: Meter = registry.meter(MetricRegistry.name(label, "200"))
+      val meter: Meter = registry.meter(MetricRegistry.name(labelPrefix, "200"))
       val meters: Map[String, Meter] = registry.getMeters.toMap
       meters.foreach(m => println(m._1 +": " + m._2.getCount))
       meter.getCount must equalTo(1)
@@ -47,7 +47,7 @@ class MetricsFilterSpec extends Specification {
 
     "increment request timer" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
-      val timer = registry.timer(MetricRegistry.name(label, "requestTimer"))
+      val timer = registry.timer(MetricRegistry.name(labelPrefix, "requestTimer"))
       timer.getCount must beGreaterThan(0L)
     }
   }
@@ -57,7 +57,7 @@ class MetricsFilterSpec extends Specification {
     override val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
       Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
       Status.UNAUTHORIZED)
-    override val label = classOf[MetricsFilter].getName
+    override val labelPrefix = classOf[MetricsFilter].getName
   }) {
     def handler = Action {
       Results.Ok("ok")

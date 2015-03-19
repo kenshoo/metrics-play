@@ -33,25 +33,25 @@ trait MetricsFilter extends EssentialFilter {
     * this was the original set value.
     *
     */
-  def label: String = classOf[MetricsFilter].getName
+  def labelPrefix: String = classOf[MetricsFilter].getName
 
   /** Specify which HTTP status codes have individual metrics
     *
     * Statuses not specified here are grouped together under otherStatuses
     *
-    * Defaults to 200, 400, 401, 403, 404, 409, 201, 307, 500 to maintain compatibility
+    * Defaults to 200, 400, 401, 403, 404, 409, 201, 304, 307, 500, which is compatible
     * with prior releases.
     */
   def knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
     Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
-    Status.UNAUTHORIZED)
+    Status.UNAUTHORIZED, Status.NOT_MODIFIED)
 
 
-  def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(label, s.toString))).toMap
+  def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
 
-  def requestsTimer: Timer = registry.timer(name(label, "requestTimer"))
-  def activeRequests: Counter = registry.counter(name(label, "activeRequests"))
-  def otherStatuses: Meter = registry.meter(name(label, "other"))
+  def requestsTimer: Timer = registry.timer(name(labelPrefix, "requestTimer"))
+  def activeRequests: Counter = registry.counter(name(labelPrefix, "activeRequests"))
+  def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
 
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
