@@ -16,6 +16,7 @@
 package com.kenshoo.play.metrics
 
 import org.specs2.mutable.Specification
+import play.api.http.Status
 import play.api.mvc._
 import play.api.test._
 import play.api.test.Helpers._
@@ -28,6 +29,8 @@ import scala.collection.JavaConversions._
 class MetricsFilterSpec extends Specification {
   sequential
 
+  val label = classOf[MetricsFilter].getName
+
   "metrics filter" should {
     "return passed response code" in new ApplicationWithFilter {
       val result = route(FakeRequest("GET", "/")).get
@@ -36,7 +39,7 @@ class MetricsFilterSpec extends Specification {
 
     "increment status code counter" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
-      val meter: Meter = registry.meter(MetricRegistry.name(classOf[MetricsFilter], "200"))
+      val meter: Meter = registry.meter(MetricRegistry.name(label, "200"))
       val meters: Map[String, Meter] = registry.getMeters.toMap
       meters.foreach(m => println(m._1 +": " + m._2.getCount))
       meter.getCount must equalTo(1)
@@ -44,13 +47,17 @@ class MetricsFilterSpec extends Specification {
 
     "increment request timer" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
-      val timer = registry.timer(MetricRegistry.name(classOf[MetricsFilter], "requestTimer"))
-      timer.getCount must beGreaterThan(0l)
+      val timer = registry.timer(MetricRegistry.name(label, "requestTimer"))
+      timer.getCount must beGreaterThan(0L)
     }
   }
 
   class MockGlobal(val reg: MetricRegistry) extends WithFilters(new MetricsFilter{
     val registry: MetricRegistry = reg
+    override val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
+      Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
+      Status.UNAUTHORIZED)
+    override val label = classOf[MetricsFilter].getName
   }) {
     def handler = Action {
       Results.Ok("ok")
