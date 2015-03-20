@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 
 import ch.qos.logback.classic
 import com.codahale.metrics.logback.InstrumentedAppender
-import play.api.{Logger, Application, Play, Plugin}
+import play.api._
 
 import com.codahale.metrics.{MetricRegistry, SharedMetricRegistries}
 import com.codahale.metrics.json.MetricsModule
@@ -34,7 +34,7 @@ object MetricsRegistry {
     case Some(plugin) => SharedMetricRegistries.getOrCreate(plugin.registryName)
     case None => throw new Exception("metrics plugin is not configured")
   }
-  
+
   @deprecated(message = "use defualtRegistry")
   def default = defaultRegistry
 }
@@ -47,7 +47,7 @@ class MetricsPlugin(val app: Application) extends Plugin {
 
   def registryName = app.configuration.getString("metrics.name").getOrElse("default")
 
-  implicit def stringToTimeUnit(s: String) : TimeUnit = TimeUnit.valueOf(s)
+  implicit def stringToTimeUnit(s: String): TimeUnit = TimeUnit.valueOf(s)
 
   override def onStart() {
     def setupJvmMetrics(registry: MetricRegistry) {
@@ -71,14 +71,29 @@ class MetricsPlugin(val app: Application) extends Plugin {
       }
     }
 
+    def setupReporting(conf: Configuration, registry: MetricRegistry) =
+      Map(
+        "graphite" -> Reporter.graphite _,
+        "console" -> Reporter.console _,
+        "csv" -> Reporter.csv _
+      ).foreach {
+        case (name, fun) =>
+          conf.getConfig(name).foreach {
+            conf =>
+              if (conf.getBoolean("enabled").getOrElse(false))
+                fun(conf, registry)()
+          }
+      }
+
     if (enabled) {
       val registry: MetricRegistry = SharedMetricRegistries.getOrCreate(registryName)
-      val rateUnit     = app.configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
+      val rateUnit = app.configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
       val durationUnit = app.configuration.getString("metrics.durationUnit", validUnits).getOrElse("SECONDS")
-      val showSamples  = app.configuration.getBoolean("metrics.showSamples").getOrElse(false)
+      val showSamples = app.configuration.getBoolean("metrics.showSamples").getOrElse(false)
 
       setupJvmMetrics(registry)
       setupLogbackMetrics(registry)
+      setupReporting(app.configuration.getConfig("metrics.reporting").getOrElse(Configuration.empty), registry)
 
       val module = new MetricsModule(rateUnit, durationUnit, showSamples)
       mapper.registerModule(module)

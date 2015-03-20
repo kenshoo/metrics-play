@@ -83,6 +83,7 @@ class MetricsPluginSpec extends Specification with Mockito with BeforeAfterExamp
     config.getBoolean("metrics.jvm") returns jvm
     config.getBoolean("metrics.logback") returns logback
     config.getBoolean("metrics.showSamples") returns Option.empty
+    config.getConfig("metrics.reporting") returns Option.empty
     new MetricsPlugin(app)
   }
 
