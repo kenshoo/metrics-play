@@ -16,7 +16,6 @@
 package com.kenshoo.play.metrics
 
 import play.api.mvc._
-import play.api.http.Status
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import com.codahale.metrics._
