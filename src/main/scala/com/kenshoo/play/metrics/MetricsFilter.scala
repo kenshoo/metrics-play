@@ -27,15 +27,31 @@ trait MetricsFilter extends EssentialFilter {
 
   def registry: MetricRegistry
 
-  val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
+  /** Specify a meaningful prefix for metrics
+    *
+    * Defaults to classOf[MetricsFilter].getName for backward compatibility as
+    * this was the original set value.
+    *
+    */
+  def labelPrefix: String = classOf[MetricsFilter].getName
+
+  /** Specify which HTTP status codes have individual metrics
+    *
+    * Statuses not specified here are grouped together under otherStatuses
+    *
+    * Defaults to 200, 400, 401, 403, 404, 409, 201, 304, 307, 500, which is compatible
+    * with prior releases.
+    */
+  def knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
     Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
-    Status.UNAUTHORIZED)
+    Status.UNAUTHORIZED, Status.NOT_MODIFIED)
 
-  def statusCodes: Map[Int, Meter] = knownStatuses.map (s => s -> registry.meter(name(classOf[MetricsFilter], s.toString))).toMap
 
-  def requestsTimer:  Timer   = registry.timer(name(classOf[MetricsFilter], "requestTimer"))
-  def activeRequests: Counter = registry.counter(name(classOf[MetricsFilter], "activeRequests"))
-  def otherStatuses:  Meter   = registry.meter(name(classOf[MetricsFilter], "other"))
+  def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
+
+  def requestsTimer: Timer = registry.timer(name(labelPrefix, "requestTimer"))
+  def activeRequests: Counter = registry.counter(name(labelPrefix, "activeRequests"))
+  def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
 
   def apply(next: EssentialAction) = new EssentialAction {
     def apply(rh: RequestHeader) = {
