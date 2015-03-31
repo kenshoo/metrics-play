@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.8"
+    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.9"
     )
 ```
 
@@ -110,6 +110,7 @@ created metrics, and to specify which HTTP Status codes should have individual m
 ## Changes
 
 2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
+2.3.0_0.1.9 - Add extra http codes, support configurable metrics names for requests filter
 
 ## License
 This code is released under the Apache Public License 2.0.
