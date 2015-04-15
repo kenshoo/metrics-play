@@ -41,14 +41,12 @@ class MetricsFilterSpec extends Specification {
     "increment status code counter" in new ApplicationWithFilter {
       route(FakeRequest("GET", "/")).get
       val meter: Meter = registry.meter(MetricRegistry.name(labelPrefix, "200"))
-      val meters: Map[String, Meter] = registry.getMeters.toMap
       meter.getCount must equalTo(1)
     }
 
     "increment status code counter for uncaught exceptions" in new ApplicationWithFilter {
       Await.ready(route(FakeRequest("GET", "/throws")).get, Duration(2, "seconds"))
       val meter: Meter = registry.meter(MetricRegistry.name(labelPrefix, "500"))
-      val meters: Map[String, Meter] = registry.getMeters.toMap
       meter.getCount must equalTo(1)
     }
 
