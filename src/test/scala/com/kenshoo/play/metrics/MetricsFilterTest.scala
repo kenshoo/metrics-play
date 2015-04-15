@@ -22,8 +22,9 @@ import play.api.test._
 import play.api.test.Helpers._
 import com.codahale.metrics._
 import play.api.test.FakeApplication
-import scala.Some
 import scala.collection.JavaConversions._
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
 
 
 class MetricsFilterSpec extends Specification {
@@ -41,7 +42,13 @@ class MetricsFilterSpec extends Specification {
       route(FakeRequest("GET", "/")).get
       val meter: Meter = registry.meter(MetricRegistry.name(labelPrefix, "200"))
       val meters: Map[String, Meter] = registry.getMeters.toMap
-      meters.foreach(m => println(m._1 +": " + m._2.getCount))
+      meter.getCount must equalTo(1)
+    }
+
+    "increment status code counter for uncaught exceptions" in new ApplicationWithFilter {
+      Await.ready(route(FakeRequest("GET", "/throws")).get, Duration(2, "seconds"))
+      val meter: Meter = registry.meter(MetricRegistry.name(labelPrefix, "500"))
+      val meters: Map[String, Meter] = registry.getMeters.toMap
       meter.getCount must equalTo(1)
     }
 
@@ -62,8 +69,16 @@ class MetricsFilterSpec extends Specification {
     def handler = Action {
       Results.Ok("ok")
     }
-    override def onRouteRequest(request: RequestHeader): Option[Handler] = {
-      Some(handler)
+    def throws = Action {
+      throw new RuntimeException("")
+      Results.Ok("ok")
+    }
+
+    override def onRouteRequest(request: RequestHeader): Option[Handler] = request.path match {
+      case "/throws" =>
+        Some(throws)
+      case _ =>
+        Some(handler)
     }
   }
 
