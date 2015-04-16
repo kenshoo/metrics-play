@@ -22,8 +22,10 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
 
+import scala.concurrent.Future
 
-trait MetricsFilter extends EssentialFilter {
+
+trait MetricsFilter extends Filter {
 
   def registry: MetricRegistry
 
@@ -53,21 +55,29 @@ trait MetricsFilter extends EssentialFilter {
   def activeRequests: Counter = registry.counter(name(labelPrefix, "activeRequests"))
   def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
 
-  def apply(next: EssentialAction) = new EssentialAction {
-    def apply(rh: RequestHeader) = {
-      val context = requestsTimer.time()
+  def apply(nextFilter: (RequestHeader) => Future[Result])
+           (rh: RequestHeader): Future[Result] = {
+    val context = requestsTimer.time()
 
-      def logCompleted(result: Result): Result = {
-        activeRequests.dec()
-        context.stop()
-        statusCodes.getOrElse(result.header.status, otherStatuses).mark()
-        result
-      }
-
-      activeRequests.inc()
-      next(rh).map(logCompleted)
+    def logCompleted(result: Result): Unit = {
+      activeRequests.dec()
+      context.stop()
+      statusCodes.getOrElse(result.header.status, otherStatuses).mark()
     }
+
+    activeRequests.inc()
+    nextFilter(rh).transform(
+      result => {
+        logCompleted(result)
+        result
+      },
+      exception => {
+        logCompleted(Results.InternalServerError)
+        exception
+      }
+    )
   }
+
 }
 
 /**
