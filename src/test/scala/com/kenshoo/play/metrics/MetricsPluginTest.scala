@@ -59,7 +59,7 @@ class MetricsPluginSpec extends Specification with Mockito with BeforeAfterExamp
       val plugin = config()
       plugin.onStart()
       val metrics: Map[String, Metric] = SharedMetricRegistries.getOrCreate("default").getMetrics
-      metrics must haveKey("heap.usage")
+      metrics must haveKey("jvm.memory.heap.usage")
     }
 
     "registers logback metrics" in {
