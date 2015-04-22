@@ -21,7 +21,7 @@ import ch.qos.logback.classic
 import com.codahale.metrics.logback.InstrumentedAppender
 import play.api.{Logger, Application, Play, Plugin}
 
-import com.codahale.metrics.{MetricRegistry, SharedMetricRegistries}
+import com.codahale.metrics.{JvmAttributeGaugeSet, MetricRegistry, SharedMetricRegistries}
 import com.codahale.metrics.json.MetricsModule
 import com.codahale.metrics.jvm.{ThreadStatesGaugeSet, GarbageCollectorMetricSet, MemoryUsageGaugeSet}
 
@@ -53,9 +53,10 @@ class MetricsPlugin(val app: Application) extends Plugin {
     def setupJvmMetrics(registry: MetricRegistry) {
       val jvmMetricsEnabled = app.configuration.getBoolean("metrics.jvm").getOrElse(true)
       if (jvmMetricsEnabled) {
-        registry.registerAll(new GarbageCollectorMetricSet())
-        registry.registerAll(new MemoryUsageGaugeSet())
-        registry.registerAll(new ThreadStatesGaugeSet())
+        registry.register("jvm.attribute", new JvmAttributeGaugeSet())
+        registry.register("jvm.gc", new GarbageCollectorMetricSet())
+        registry.register("jvm.memory", new MemoryUsageGaugeSet())
+        registry.register("jvm.threads", new ThreadStatesGaugeSet())
       }
     }
 

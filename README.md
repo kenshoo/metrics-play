@@ -112,6 +112,8 @@ created metrics, and to specify which HTTP Status codes should have individual m
 2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
 2.3.0_0.1.9 - Add extra http codes, support configurable metrics names for requests filter
 2.3.0_0.2.0 - Meter uncaught exceptions as 500 Internal Server Error
+2.3.0_0.2.1 - Breaking Change! prefix jvm metric names to standardize with dropwizard
+
 
 ## License
 This code is released under the Apache Public License 2.0.
