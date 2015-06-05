@@ -4,7 +4,7 @@ import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.TimeUnit
 
-import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
+import com.codahale.metrics.graphite.{GraphiteUDP, Graphite, GraphiteReporter}
 import com.codahale.metrics.{ConsoleReporter, CsvReporter, MetricFilter, MetricRegistry}
 import play.api.{Configuration, Logger}
 
@@ -21,7 +21,7 @@ object Reporter {
       } yield () => {
         Logger.info("Enabling GraphiteReporter")
         val myname = InetAddress.getLocalHost.getHostName
-        val graphite = new Graphite(new InetSocketAddress(host, port))
+        val graphite = new GraphiteUDP(new InetSocketAddress(host, port))
         val reporter = GraphiteReporter.forRegistry(registry)
           .prefixedWith(s"app.$myname.$prefix")
           .convertRatesTo(TimeUnit.SECONDS)
