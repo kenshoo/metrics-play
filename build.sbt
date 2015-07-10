@@ -1,10 +1,11 @@
+
 organization := "com.kenshoo"
 
 name := "metrics-play"
 
-version := "2.3.0_0.1.9"
+version := "2.4.0_0.1.9-r4_inbox"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.7"
 
 crossScalaVersions := Seq("2.10.4", "2.11.2")
 
@@ -21,19 +22,20 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play" % "2.3.4" % "provided",
   //test
   "com.typesafe.play" %% "play-test" % "2.3.4" % "test",
-  "org.specs2" %% "specs2" % "2.3.12" % "test",
-  "org.mockito" % "mockito-all" % "1.9.5" % "test"
+  "org.specs2" %% "specs2" % "3.3.1" % "test",
+  "org.mockito" % "mockito-all" % "1.9.5" % "test",
+  "javax.inject" % "javax.inject" % "1"
 )
+
+libraryDependencies += specs2 % Test
+
+resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 publishMavenStyle := true
 
-publishTo <<= version { (v: String) =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+publishTo := Some("cody" at "http://cody:8082/nexus/content/repositories/releases")
+
+credentials += Credentials(Path.userHome / ".sbt" / "sonatype.credentials")
 
 pomIncludeRepository := { _ => false}
 

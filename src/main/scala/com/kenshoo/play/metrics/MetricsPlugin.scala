@@ -26,7 +26,7 @@ import com.codahale.metrics.json.MetricsModule
 import com.codahale.metrics.jvm.{ThreadStatesGaugeSet, GarbageCollectorMetricSet, MemoryUsageGaugeSet}
 
 import com.fasterxml.jackson.databind.ObjectMapper
-
+import javax.inject.Inject
 
 object MetricsRegistry {
 
@@ -39,8 +39,7 @@ object MetricsRegistry {
   def default = defaultRegistry
 }
 
-
-class MetricsPlugin(val app: Application) extends Plugin {
+class MetricsPlugin @Inject() (val app: Application) extends Plugin {
   val validUnits = Some(Set("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS"))
 
   val mapper: ObjectMapper = new ObjectMapper()
