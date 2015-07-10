@@ -25,7 +25,9 @@ import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.{ObjectWriter, ObjectMapper}
 
 
-class MetricsController @Inject()(registry: MetricRegistry, app: Application) extends Controller {
+class MetricsController @Inject()(app: Application) extends Controller {
+
+  val registry = MetricsRegistry.defaultRegistry
 
   def serialize(mapper: ObjectMapper) = {
     val writer: ObjectWriter = mapper.writerWithDefaultPrettyPrinter()
