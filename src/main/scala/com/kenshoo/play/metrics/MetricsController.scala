@@ -16,6 +16,7 @@
 package com.kenshoo.play.metrics
 
 import java.io.StringWriter
+import javax.inject.Inject
 
 import play.api.{Application, Play}
 import play.api.mvc.{Action, Controller}
@@ -24,12 +25,7 @@ import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.{ObjectWriter, ObjectMapper}
 
 
-trait MetricsController {
-  self: Controller =>
-
-  def registry: MetricRegistry
-
-  def app: Application
+class MetricsController @Inject()(registry: MetricRegistry, app: Application) extends Controller {
 
   def serialize(mapper: ObjectMapper) = {
     val writer: ObjectWriter = mapper.writerWithDefaultPrettyPrinter()
@@ -49,9 +45,4 @@ trait MetricsController {
     }
   }
 
-}
-
-object MetricsController extends Controller with MetricsController {
-  def registry = MetricsRegistry.defaultRegistry
-  def app = Play.current
 }
