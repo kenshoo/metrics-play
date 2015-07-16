@@ -4,7 +4,7 @@ This module provides some support for @codahale [Metrics](https://dropwizard.git
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
-Play Version: 2.3.4, Metrics Version: 3.1.0, Scala Versions: 2.10.4, 2.11.2
+Play Version: 2.4.0, Metrics Version: 3.1.1, Scala Versions: 2.11.6
 
 ## Features
 
@@ -20,7 +20,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.3.0_0.1.9"
+    "com.kenshoo" %% "metrics-play" % "2.4.0_0.3.0"
     )
 ```
 
@@ -109,10 +109,11 @@ created metrics, and to specify which HTTP Status codes should have individual m
 
 ## Changes
 
-2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
-2.3.0_0.1.9 - Add extra http codes, support configurable metrics names for requests filter
-2.3.0_0.2.0 - Meter uncaught exceptions as 500 Internal Server Error
+2.4.0_0.3.0 - Upgrade to play 2.4, metrics 3.1.2
 2.3.0_0.2.1 - Breaking Change! prefix jvm metric names to standardize with dropwizard
+2.3.0_0.2.0 - Meter uncaught exceptions as 500 Internal Server Error
+2.3.0_0.1.9 - Add extra http codes, support configurable metrics names for requests filter
+2.3.0_0.1.8 - Support default registry in play java. Replace MetricsRegistry.default with MetricsRegistry.defaultRegistry (to support java where default is a reserved keyword)
 
 
 ## License
