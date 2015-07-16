@@ -17,9 +17,10 @@ libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-json" % "3.1.0",
     "io.dropwizard.metrics" % "metrics-jvm" % "3.1.0",
     "io.dropwizard.metrics" % "metrics-logback" % "3.1.0",
-    "com.typesafe.play" %% "play" % "2.3.4" % "provided",
+    "com.typesafe.play" %% "play" % "2.4.0" % "provided",
     //test
-    "com.typesafe.play" %% "play-test" % "2.3.4" % "test",
+    "com.typesafe.play" %% "play-test" % "2.4.0" % "test",
+    "com.typesafe.play" %% "play-specs2" % "2.4.0" % "test",
     "org.specs2" %% "specs2" % "2.3.12" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test"
 )
