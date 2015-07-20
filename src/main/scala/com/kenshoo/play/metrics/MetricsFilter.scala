@@ -15,11 +15,12 @@
 */
 package com.kenshoo.play.metrics
 
-import play.api.mvc._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import javax.inject.Inject
 
-import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
+import com.codahale.metrics._
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.mvc._
 
 trait MetricsFilter extends EssentialFilter {
 
@@ -33,8 +34,8 @@ trait MetricsFilter extends EssentialFilter {
 
     def apply(rh: RequestHeader) = {
 
-      val method = rh.tags.getOrElse(play.api.Routes.ROUTE_ACTION_METHOD, "MetricsFilter")
-      val controller = rh.tags.getOrElse(play.api.Routes.ROUTE_CONTROLLER, getClass.getPackage.getName)
+      val method = rh.tags.getOrElse(play.api.routing.Router.Tags.RouteActionMethod, "MetricsFilter")
+      val controller = rh.tags.getOrElse(play.api.routing.Router.Tags.RouteController, getClass.getPackage.getName)
 
       val context = registry.timer(s"latency.$controller.$method").time()
       val globalCtx = requestsTimer.time()
@@ -56,10 +57,6 @@ trait MetricsFilter extends EssentialFilter {
 /**
  * use this filter when writing play java. bypasses the no ctor problem of scala object
  */
-class JavaMetricsFilter extends MetricsFilter {
-  override def registry: MetricRegistry = MetricsRegistry.defaultRegistry
-}
-
-object MetricsFilter extends MetricsFilter {
-  override def registry = MetricsRegistry.defaultRegistry
+class JavaMetricsFilter @Inject() (registries: MetricRegistries) extends MetricsFilter {
+  def registry: MetricRegistry = registries.getOrCreate
 }

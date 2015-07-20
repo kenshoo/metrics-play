@@ -16,41 +16,36 @@
 package com.kenshoo.play.metrics
 
 import java.util.concurrent.TimeUnit
-
-import ch.qos.logback.classic
-import com.codahale.metrics.logback.InstrumentedAppender
-import play.api._
-
-import com.codahale.metrics.{MetricRegistry, SharedMetricRegistries}
-import com.codahale.metrics.json.MetricsModule
-import com.codahale.metrics.jvm.{ThreadStatesGaugeSet, GarbageCollectorMetricSet, MemoryUsageGaugeSet}
-
-import com.fasterxml.jackson.databind.ObjectMapper
 import javax.inject.Inject
 
-object MetricsRegistry {
+import ch.qos.logback.classic
+import com.codahale.metrics.json.MetricsModule
+import com.codahale.metrics.jvm.{GarbageCollectorMetricSet, MemoryUsageGaugeSet, ThreadStatesGaugeSet}
+import com.codahale.metrics.logback.InstrumentedAppender
+import com.codahale.metrics.{MetricRegistry, SharedMetricRegistries}
+import com.fasterxml.jackson.databind.ObjectMapper
+import play.api._
+import play.api.inject.{ApplicationLifecycle, Module}
+import javax.inject._
+import scala.concurrent.Future
 
-  def defaultRegistry = Play.current.plugin[MetricsPlugin] match {
-    case Some(plugin) => SharedMetricRegistries.getOrCreate(plugin.registryName)
-    case None => throw new Exception("metrics plugin is not configured")
-  }
+@Singleton
+class MetricsPlugin @Inject()(configuration: Configuration, lifecycle: ApplicationLifecycle, registries: MetricRegistries, app: Application, stoper: RegistryStopper) {
 
-  @deprecated(message = "use defualtRegistry")
-  def default = defaultRegistry
-}
-
-class MetricsPlugin @Inject() (val app: Application) extends Plugin {
   val validUnits = Some(Set("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS"))
 
   val mapper: ObjectMapper = new ObjectMapper()
 
-  def registryName = app.configuration.getString("metrics.name").getOrElse("default")
-
   implicit def stringToTimeUnit(s: String): TimeUnit = TimeUnit.valueOf(s)
 
-  override def onStart() {
+  val registry = registries.getOrCreate
+
+  lifecycle.addStopHook(() => Future.successful(stoper.stop()))
+  onStart()
+
+  def onStart() {
     def setupJvmMetrics(registry: MetricRegistry) {
-      val jvmMetricsEnabled = app.configuration.getBoolean("metrics.jvm").getOrElse(true)
+      val jvmMetricsEnabled = configuration.getBoolean("metrics.jvm").getOrElse(true)
       if (jvmMetricsEnabled) {
         registry.registerAll(new GarbageCollectorMetricSet())
         registry.registerAll(new MemoryUsageGaugeSet())
@@ -59,7 +54,7 @@ class MetricsPlugin @Inject() (val app: Application) extends Plugin {
     }
 
     def setupLogbackMetrics(registry: MetricRegistry) = {
-      val logbackEnabled = app.configuration.getBoolean("metrics.logback").getOrElse(true)
+      val logbackEnabled = configuration.getBoolean("metrics.logback").getOrElse(true)
       if (logbackEnabled) {
         val appender: InstrumentedAppender = new InstrumentedAppender(registry)
 
@@ -85,27 +80,37 @@ class MetricsPlugin @Inject() (val app: Application) extends Plugin {
       }
 
     if (enabled) {
-      val registry: MetricRegistry = SharedMetricRegistries.getOrCreate(registryName)
-      val rateUnit = app.configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
-      val durationUnit = app.configuration.getString("metrics.durationUnit", validUnits).getOrElse("SECONDS")
-      val showSamples = app.configuration.getBoolean("metrics.showSamples").getOrElse(false)
+      val rateUnit = configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
+      val durationUnit = configuration.getString("metrics.durationUnit", validUnits).getOrElse("SECONDS")
+      val showSamples = configuration.getBoolean("metrics.showSamples").getOrElse(false)
 
       setupJvmMetrics(registry)
       setupLogbackMetrics(registry)
-      setupReporting(app.configuration.getConfig("metrics.reporting").getOrElse(Configuration.empty), registry)
+      setupReporting(configuration.getConfig("metrics.reporting").getOrElse(Configuration.empty), registry)
 
       val module = new MetricsModule(rateUnit, durationUnit, showSamples)
+      new MetricsModule(rateUnit, durationUnit, showSamples)
       mapper.registerModule(module)
     }
   }
 
-
-  override def onStop() {
-    if (enabled) {
-      SharedMetricRegistries.remove(registryName)
-    }
-  }
-
-  override def enabled = app.configuration.getBoolean("metrics.enabled").getOrElse(true)
+  def enabled = configuration.getBoolean("metrics.enabled").getOrElse(true)
 }
 
+class RegistryStopper @Inject()(configuration: Configuration) {
+  def stop() = SharedMetricRegistries.remove(configuration.getString("metrics.name").getOrElse("default"))
+}
+
+class MetricRegistries @Inject()(configuration: Configuration) {
+  def getOrCreate =
+    SharedMetricRegistries.getOrCreate(configuration.getString("metrics.name").getOrElse("default"))
+}
+
+class PlayMetricsModule extends Module {
+  def bindings(environment: Environment,
+               configuration: Configuration) = Seq(
+    bind[MetricsPlugin].toSelf,
+    bind[RegistryStopper].toSelf,
+    bind[MetricRegistries].toSelf
+  )
+}

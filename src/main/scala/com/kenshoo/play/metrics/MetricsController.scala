@@ -25,26 +25,20 @@ import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.{ObjectWriter, ObjectMapper}
 
 
-class MetricsController @Inject()(app: Application) extends Controller {
-
-  val registry = MetricsRegistry.defaultRegistry
+class MetricsController @Inject()(plugin: MetricsPlugin) extends Controller {
 
   def serialize(mapper: ObjectMapper) = {
     val writer: ObjectWriter = mapper.writerWithDefaultPrettyPrinter()
     val stringWriter = new StringWriter()
-    writer.writeValue(stringWriter, registry)
+    writer.writeValue(stringWriter, plugin.registry)
     Ok(stringWriter.toString).as("application/json").withHeaders("Cache-Control" -> "must-revalidate,no-cache,no-store")
   }
 
   def metrics = Action {
-    app.plugin[MetricsPlugin] match {
-      case Some(plugin) =>
-        if (plugin.enabled)
-          serialize(plugin.mapper)
-        else
-          InternalServerError("metrics plugin not enabled")
-      case None => InternalServerError("metrics plugin is not found")
-    }
+    if (plugin.enabled)
+      serialize(plugin.mapper)
+    else
+      InternalServerError("metrics plugin not enabled")
   }
 
 }

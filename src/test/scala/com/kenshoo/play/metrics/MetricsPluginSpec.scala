@@ -15,17 +15,20 @@
 */
 package com.kenshoo.play.metrics
 
-import org.specs2.mutable.Specification
-import org.specs2.mock.Mockito
-import play.api.{Configuration, Application}
 import com.codahale.metrics.{Metric, SharedMetricRegistries}
-import org.specs2.specification.BeforeAfterExample
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Specification
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable.Map
 
-
-class MetricsPluginSpec extends Specification with Mockito with BeforeAfterExample{
+class MetricsPluginSpec extends Specification with Mockito with BeforaAfterTest {
   sequential
+
+  var currentApp: Option[Application] = None
+
   "metrics plugin" should {
 
     "be enabled by default" in {
@@ -45,26 +48,22 @@ class MetricsPluginSpec extends Specification with Mockito with BeforeAfterExamp
 
     "registers default metric registry" in {
       val plugin = config()
-      plugin.onStart()
       SharedMetricRegistries.names().contains("default") must beTrue
     }
 
     "registers metric by name" in  {
       val plugin = config(name = Option("name"))
-      plugin.onStart()
       SharedMetricRegistries.names().contains("name") must beTrue
     }
 
     "registers jvm metrics" in {
       val plugin = config()
-      plugin.onStart()
       val metrics: Map[String, Metric] = SharedMetricRegistries.getOrCreate("default").getMetrics
       metrics must haveKey("heap.usage")
     }
 
     "registers logback metrics" in {
       val plugin = config(logback = Some(true))
-      plugin.onStart()
       val metrics: Map[String, Metric] = SharedMetricRegistries.getOrCreate("default").getMetrics
       metrics must haveKey("ch.qos.logback.core.Appender.info")
     }
@@ -74,22 +73,17 @@ class MetricsPluginSpec extends Specification with Mockito with BeforeAfterExamp
              name: Option[String] = Option.empty,
              jvm: Option[Boolean] = Option.empty,
              logback: Option[Boolean] = Option.empty): MetricsPlugin = {
-    val app = mock[Application]
-    val config = mock[Configuration]
-    app.configuration returns config
-    config.getString(anyString, any[Option[Set[String]]]) returns Option.empty
-    config.getBoolean("metrics.enabled") returns enabled
-    config.getString("metrics.name") returns name
-    config.getBoolean("metrics.jvm") returns jvm
-    config.getBoolean("metrics.logback") returns logback
-    config.getBoolean("metrics.showSamples") returns Option.empty
-    config.getConfig("metrics.reporting") returns Option.empty
-    new MetricsPlugin(app)
+
+    val app = new GuiceApplicationBuilder().configure(
+      "metrics.enabled" -> enabled.getOrElse(true),
+      "metrics.name" -> name.getOrElse("default"),
+      "metrics.jvm" -> jvm.getOrElse(true),
+      "metrics.logback" -> logback.getOrElse(false),
+      "metrics.showSamples" -> false
+    ).build()
+    val conf = app.configuration
+    currentApp = Some(app)
+    app.injector.instanceOf[MetricsPlugin]
   }
 
-  def after {
-    SharedMetricRegistries.clear()
-  }
-
-  protected def before: Any = {}
 }
