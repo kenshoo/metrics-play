@@ -109,8 +109,8 @@ class MetricRegistries @Inject()(configuration: Configuration) {
 class PlayMetricsModule extends Module {
   def bindings(environment: Environment,
                configuration: Configuration) = Seq(
-    bind[MetricsPlugin].toSelf,
-    bind[RegistryStopper].toSelf,
-    bind[MetricRegistries].toSelf
+    bind[MetricsPlugin].toSelf.eagerly(),
+    bind[RegistryStopper].toSelf.eagerly(),
+    bind[MetricRegistries].toSelf.eagerly()
   )
 }
