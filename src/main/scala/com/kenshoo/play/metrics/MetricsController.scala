@@ -23,8 +23,7 @@ import play.api.mvc.{Action, Controller}
 import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.{ObjectWriter, ObjectMapper}
 
-
-trait MetricsController {
+trait Metrics {
   self: Controller =>
 
   def registry: MetricRegistry
@@ -48,10 +47,9 @@ trait MetricsController {
       case None => InternalServerError("metrics plugin is not found")
     }
   }
-
 }
 
-object MetricsController extends Controller with MetricsController {
+class MetricsController extends Controller with Metrics {
   def registry = MetricsRegistry.defaultRegistry
   def app = Play.current
 }
