@@ -2,7 +2,6 @@ package com.kenshoo.play.metrics
 
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 
-import com.kenshoo.play.metrics.RoutesMetricsFilter.{MetricsRoutes, RequestMetrics}
 import play.api.Routes
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -65,31 +64,34 @@ trait RoutesMetricsFilter extends Filter {
 }
 
 
-object RoutesMetricsFilter {
-  class RequestMetrics(registry:MetricRegistry, prefix:String, systemName:String) {
-    def requestTimer:Timer =
-      registry.timer(MetricRegistry.name(prefix, systemName, "requestTimer"))
+object RoutesMetricsFilter extends RoutesMetricsFilter {
+  override def registry = MetricsRegistry.defaultRegistry
+}
 
-    def activeRequests:Counter =
-      registry.counter(MetricRegistry.name(prefix, systemName, "activeRequests"))
 
-    def statusCodes(status:Int):Meter =
-      registry.meter(
-        MetricRegistry.name(prefix, systemName, status.toString)
-      )
-  }
+class RequestMetrics(registry:MetricRegistry, prefix:String, systemName:String) {
+  def requestTimer:Timer =
+    registry.timer(MetricRegistry.name(prefix, systemName, "requestTimer"))
 
-  class MetricsRoutes(val registry:MetricRegistry, val prefix:String) {
-    val accurateSites   = new ConcurrentHashMap[String,RequestMetrics]()
+  def activeRequests:Counter =
+    registry.counter(MetricRegistry.name(prefix, systemName, "activeRequests"))
 
-    def forHeader(requestHeader: RequestHeader):RequestMetrics = {
-      val tag: String = requestHeader.tags.getOrElse(Routes.ROUTE_PATTERN, "unkown")
-      var rm = accurateSites.get(tag)
-      if (rm == null) {
-        rm = new RequestMetrics(registry, prefix, tag)
-      }
+  def statusCodes(status:Int):Meter =
+    registry.meter(
+      MetricRegistry.name(prefix, systemName, status.toString)
+    )
+}
 
-      rm
+class MetricsRoutes(val registry:MetricRegistry, val prefix:String) {
+  val accurateSites   = new ConcurrentHashMap[String,RequestMetrics]()
+
+  def forHeader(requestHeader: RequestHeader):RequestMetrics = {
+    val tag: String = requestHeader.tags.getOrElse(Routes.ROUTE_PATTERN, "unkown")
+    var rm = accurateSites.get(tag)
+    if (rm == null) {
+      rm = new RequestMetrics(registry, prefix, tag)
     }
+
+    rm
   }
 }
