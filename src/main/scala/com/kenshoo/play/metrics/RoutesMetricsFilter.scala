@@ -10,6 +10,11 @@ import com.codahale.metrics._
 
 import scala.concurrent.Future
 
+/**
+ * similar to MetricsFilter but
+ * provide requestTime and other metrics for each route of app individually.
+ * For simplicity, it does not support filtering response codes yet.
+ */
 trait RoutesMetricsFilter extends Filter {
   def registry: MetricRegistry
 
@@ -63,12 +68,13 @@ trait RoutesMetricsFilter extends Filter {
   }
 }
 
-
 object RoutesMetricsFilter extends RoutesMetricsFilter {
   override def registry = MetricsRegistry.defaultRegistry
 }
 
-
+/**
+ * Holds few diffrent metrics with same prefixes. 
+ */
 class RequestMetrics(registry:MetricRegistry, prefix:String, systemName:String) {
   def requestTimer:Timer =
     registry.timer(MetricRegistry.name(prefix, systemName, "requestTimer"))
@@ -82,6 +88,9 @@ class RequestMetrics(registry:MetricRegistry, prefix:String, systemName:String) 
     )
 }
 
+/**
+ * Helps in mapping RequestHeader -> RequestMetrics. 
+ */
 class MetricsRoutes(val registry:MetricRegistry, val prefix:String) {
   val accurateSites   = new ConcurrentHashMap[String,RequestMetrics]()
 
