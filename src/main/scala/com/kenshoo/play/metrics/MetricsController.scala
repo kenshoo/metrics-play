@@ -15,43 +15,20 @@
 */
 package com.kenshoo.play.metrics
 
-import java.io.StringWriter
+import javax.inject.Inject
 
-import play.api.{Application, Play}
 import play.api.mvc.{Action, Controller}
 
-import com.codahale.metrics.MetricRegistry
-import com.fasterxml.jackson.databind.{ObjectWriter, ObjectMapper}
-
-
-trait MetricsController {
-  self: Controller =>
-
-  def registry: MetricRegistry
-
-  def app: Application
-
-  def serialize(mapper: ObjectMapper) = {
-    val writer: ObjectWriter = mapper.writerWithDefaultPrettyPrinter()
-    val stringWriter = new StringWriter()
-    writer.writeValue(stringWriter, registry)
-    Ok(stringWriter.toString).as("application/json").withHeaders("Cache-Control" -> "must-revalidate,no-cache,no-store")
-  }
+class MetricsController @Inject() (metricsRegistry: Metrics) extends Controller {
 
   def metrics = Action {
-    app.plugin[MetricsPlugin] match {
-      case Some(plugin) =>
-        if (plugin.enabled)
-          serialize(plugin.mapper)
-        else
-          InternalServerError("metrics plugin not enabled")
-      case None => InternalServerError("metrics plugin is not found")
+    try {
+      Ok(metricsRegistry.toJson)
+        .as("application/json")
+        .withHeaders("Cache-Control" -> "must-revalidate,no-cache,no-store")
+    } catch {
+      case ex: MetricsDisabledException =>
+        InternalServerError("metrics plugin not enabled")
     }
   }
-
-}
-
-object MetricsController extends Controller with MetricsController {
-  def registry = MetricsRegistry.defaultRegistry
-  def app = Play.current
 }

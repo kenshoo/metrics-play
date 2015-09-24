@@ -15,6 +15,8 @@
 */
 package com.kenshoo.play.metrics
 
+import javax.inject.Inject
+
 import play.api.mvc._
 import play.api.http.Status
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -25,9 +27,17 @@ import com.codahale.metrics.MetricRegistry.name
 import scala.concurrent.Future
 
 
-trait MetricsFilter extends Filter {
+trait MetricsFilter extends Filter
 
-  def registry: MetricRegistry
+class DisabledMetricsFilter @Inject() extends MetricsFilter {
+  def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
+    nextFilter(rh)
+  }
+}
+
+class MetricsFilterImpl @Inject() (metricsRegistry: Metrics) extends MetricsFilter {
+
+  def registry: MetricRegistry = metricsRegistry.defaultRegistry
 
   /** Specify a meaningful prefix for metrics
     *
@@ -55,8 +65,8 @@ trait MetricsFilter extends Filter {
   def activeRequests: Counter = registry.counter(name(labelPrefix, "activeRequests"))
   def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
 
-  def apply(nextFilter: (RequestHeader) => Future[Result])
-           (rh: RequestHeader): Future[Result] = {
+  def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
+
     val context = requestsTimer.time()
 
     def logCompleted(result: Result): Unit = {
@@ -77,16 +87,4 @@ trait MetricsFilter extends Filter {
       }
     )
   }
-
-}
-
-/**
- * use this filter when writing play java. bypasses the no ctor problem of scala object
- */
-class JavaMetricsFilter extends MetricsFilter {
-  override def registry: MetricRegistry = MetricsRegistry.defaultRegistry
-}
-
-object MetricsFilter extends MetricsFilter {
-  override def registry = MetricsRegistry.defaultRegistry
 }
