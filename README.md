@@ -20,26 +20,28 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.4.0_0.3.0"
+    "com.kenshoo" %% "metrics-play" % "2.4.0_0.4.0"
     )
 ```
 
-To enable the plugin:
+To enable the module:
 
-add to conf/play.plugins the following line
+add to application.conf the following line
 
-     {priority}:com.kenshoo.play.metrics.MetricsPlugin
-
-where priority is the priority of this plugin with respect to other plugins.
+     play.modules.enabled+="com.kenshoo.play.metrics.PlayModule"
 
 ### Default Registry
 
+To add a custom metrics, you can use `defaultRegistry` which returns an instance of [MetricRegistry](http://metrics.dropwizard.io/3.1.0/manual/core/).
+
 ```scala
-     import com.kenshoo.play.metrics.MetricsRegistry
+     import com.kenshoo.play.metrics.Metrics
      import com.codahale.metrics.Counter
 
-     val counter = MetricsRegistry.defaultRegistry.counter("name")
-     counter.inc()
+     class SomeController @Inject() (metrics: Metrics) {
+         val counter = metrics.defaultRegistry.counter("name")
+         counter.inc()
+     }
 ````
 
 ### Metrics Controller
@@ -74,41 +76,14 @@ An implementation of the Metrics' instrumenting filter for Play2. It records req
     import com.kenshoo.play.metrics.MetricsFilter
     import play.api.mvc._
 
-    object Global extends WithFilters(MetricsFilter)
-```
-
- Note - to use the filter in play java, replace MetricsFilter class with JavaMetricsFilter
-
- ```java
-    import com.kenshoo.play.metrics.JavaMetricsFilter;
-    import play.GlobalSettings;
-    import play.api.mvc.EssentialFilter;
-    
-    public class Global extends GlobalSettings {
-        @Override
-        public <T extends EssentialFilter> Class<T>[] filters() {
-    
-            return new Class[]{JavaMetricsFilter.class};
-        }
+    class Filters @Inject() (metricsFilter: MetricsFilter) extends HttpFilters {
+        val filters = Seq(metricsFilter)
     }
- ```
-#### Configuration
-Configuration can optionally be overridden through subclassing MetricsFilter in order to change the prefix label for
-created metrics, and to specify which HTTP Status codes should have individual metrics.
-
-```scala
-    import com.kenshoo.play.metrics.{MetricsRegistry, MetricsFilter}
-    import play.api.mvc._
-
-    class Global(val reg: MetricRegistry) extends WithFilters(new MetricsFilter{
-      val registry: MetricRegistry = reg
-      override val knownStatuses: Seq[Int] = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND, Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR)
-      override val label: String = classOf[MetricsFilter].getName
-    })
 ```
 
 ## Changes
 
+* 2.4.0_0.4.0 - Re-implement as Play Module
 * 2.4.0_0.3.0 - Upgrade to play 2.4, metrics 3.1.2
 * 2.3.0_0.2.1 - Breaking Change! prefix jvm metric names to standardize with dropwizard
 * 2.3.0_0.2.0 - Meter uncaught exceptions as 500 Internal Server Error
