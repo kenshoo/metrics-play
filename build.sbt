@@ -24,8 +24,7 @@ libraryDependencies ++= Seq(
     //test
     "com.typesafe.play" %% "play-test" % "2.4.0" % "test",
     "com.typesafe.play" %% "play-specs2" % "2.4.0" % "test",
-    "org.specs2" %% "specs2" % "2.3.12" % "test",
-    "org.mockito" % "mockito-all" % "1.9.5" % "test"
+    "org.specs2" %% "specs2" % "2.3.12" % "test"
 )
 
 publishMavenStyle := true
