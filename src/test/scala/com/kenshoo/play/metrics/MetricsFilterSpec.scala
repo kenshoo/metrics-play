@@ -66,7 +66,7 @@ object MetricsFilterSpec extends Specification {
     }
 
     "increment status code counter" in withApplication(Ok("")) { implicit app =>
-      route(FakeRequest()).get
+      Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
       val meter = metrics.defaultRegistry.meter(MetricRegistry.name(labelPrefix, "200"))
       meter.getCount must equalTo(1)
     }
@@ -78,7 +78,7 @@ object MetricsFilterSpec extends Specification {
     }
 
     "increment request timer" in withApplication(Ok("")) { implicit app =>
-      route(FakeRequest()).get
+      Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
       val timer = metrics.defaultRegistry.timer(MetricRegistry.name(labelPrefix, "requestTimer"))
       timer.getCount must beGreaterThan(0L)
     }
