@@ -4,6 +4,8 @@ This module provides some support for @codahale [Metrics](https://dropwizard.git
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
+[![codecov.io](http://codecov.io/github/kenshoo/metrics-play/coverage.svg?branch=master)](http://codecov.io/github/kenshoo/metrics-play?branch=master)
+
 Play Version: 2.4.0, Metrics Version: 3.1.1, Scala Versions: 2.11.6, 2.10.4
 
 ## Features
