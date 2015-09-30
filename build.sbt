@@ -6,7 +6,7 @@ version := "2.4.0_0.4.0"
 
 scalaVersion := "2.11.6"
 
-crossScalaVersions := Seq("2.10.4", "2.11.2")
+crossScalaVersions := Seq("2.10.4", "2.11.6")
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
