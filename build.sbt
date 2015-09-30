@@ -6,7 +6,7 @@ version := "2.4.3_0.1.0"
 
 scalaVersion := "2.11.6"
 
-crossScalaVersions := Seq("2.10.4", "2.11.2")
+crossScalaVersions := Seq("2.10.4", "2.11.6")
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
@@ -24,8 +24,7 @@ libraryDependencies ++= Seq(
     //test
     "com.typesafe.play" %% "play-test" % "2.4.0" % "test",
     "com.typesafe.play" %% "play-specs2" % "2.4.0" % "test",
-    "org.specs2" %% "specs2" % "2.3.12" % "test",
-    "org.mockito" % "mockito-all" % "1.9.5" % "test"
+    "org.specs2" %% "specs2" % "2.3.12" % "test"
 )
 
 publishMavenStyle := true
