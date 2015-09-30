@@ -81,6 +81,60 @@ An implementation of the Metrics' instrumenting filter for Play2. It records req
     }
 ```
 
+## Advanced usage
+
+By default, metrics are prefixed with "com.kenshoo.play.metrics.MetricsFilter".
+
+```
+"com.kenshoo.play.metrics.MetricsFilter.200" : {
+   "count" : 1584456,
+   "m15_rate" : 1.6800220918042639,
+   "m1_rate" : 1.9015104460758263,
+   "m5_rate" : 1.8138545372237085,
+   "mean_rate" : 3.20162010446889,
+   "units" : "events/second"
+},
+```
+
+You can change the prefix by extending `MetricsFilterImpl`.
+
+```scala
+package myapp
+
+import javax.inject.Inject
+
+import com.kenshoo.play.metrics.{MetricsImpl, MetricsFilter, Metrics, MetricsFilterImpl}
+import play.api.http.Status
+import play.api.inject.Module
+import play.api.{Configuration, Environment}
+
+class MyMetricsFilter @Inject() (metrics: Metrics) extends MetricsFilterImpl(metrics) {
+
+  // configure metrics prefix
+  override def labelPrefix: String = "foobar"
+
+  // configure status codes to be monitored. other status codes are labeled as "other"
+  override def knownStatuses = Seq(Status.OK)
+}
+
+class MyMetricsModule extends Module {
+  def bindings(environment: Environment, configuration: Configuration) = {
+    Seq(
+      bind[MetricsFilter].to[MyMetricsFilter].eagerly,
+      bind[Metrics].to[MetricsImpl].eagerly
+    )
+  }
+}
+```
+
+and add a line like this to application.conf
+
+```
+play.modules.enabled+="myapp.MyMetricsModule"
+```
+
+instead of `com.kenshoo.play.metrics.PlayModule`
+
 ## Changes
 
 * 2.4.0_0.4.0 - Re-implement as Play Module
