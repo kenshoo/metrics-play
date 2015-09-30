@@ -35,9 +35,9 @@ class DisabledMetricsFilter @Inject() extends MetricsFilter {
   }
 }
 
-class MetricsFilterImpl @Inject() (metricsRegistry: Metrics) extends MetricsFilter {
+class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
 
-  def registry: MetricRegistry = metricsRegistry.defaultRegistry
+  def registry: MetricRegistry = metrics.defaultRegistry
 
   /** Specify a meaningful prefix for metrics
     *

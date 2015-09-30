@@ -19,11 +19,11 @@ import javax.inject.Inject
 
 import play.api.mvc.{Action, Controller}
 
-class MetricsController @Inject() (metricsRegistry: Metrics) extends Controller {
+class MetricsController @Inject() (met: Metrics) extends Controller {
 
   def metrics = Action {
     try {
-      Ok(metricsRegistry.toJson)
+      Ok(met.toJson)
         .as("application/json")
         .withHeaders("Cache-Control" -> "must-revalidate,no-cache,no-store")
     } catch {
