@@ -17,6 +17,7 @@ package com.kenshoo.play.metrics
 
 import javax.inject.Inject
 
+import play.api.Configuration
 import play.api.mvc._
 import play.api.http.Status
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -35,7 +36,7 @@ class DisabledMetricsFilter @Inject() extends MetricsFilter {
   }
 }
 
-class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
+class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuration) extends MetricsFilter {
 
   def registry: MetricRegistry = metrics.defaultRegistry
 
@@ -45,7 +46,7 @@ class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
     * this was the original set value.
     *
     */
-  def labelPrefix: String = classOf[MetricsFilter].getName
+  def labelPrefix: String = configuration.getString("metrics.naming.http").getOrElse(classOf[MetricsFilter].getName)
 
   /** Specify which HTTP status codes have individual metrics
     *
@@ -61,8 +62,8 @@ class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
 
   def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
 
-  def requestsTimer: Timer = registry.timer(name(labelPrefix, "requestTimer"))
-  def activeRequests: Counter = registry.counter(name(labelPrefix, "activeRequests"))
+  def requestsTimer: Timer = registry.timer(name(labelPrefix, "request_timer"))
+  def activeRequests: Counter = registry.counter(name(labelPrefix, "active_tequest"))
   def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
 
   def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {

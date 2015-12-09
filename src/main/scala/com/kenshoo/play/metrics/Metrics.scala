@@ -59,6 +59,7 @@ class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Con
   def setupLogbackMetrics(registry: MetricRegistry) = {
     if (logbackEnabled) {
       val appender: InstrumentedAppender = new InstrumentedAppender(registry)
+      configuration.getString("metrics.naming.logback").foreach(appender.setName)
 
       val logger: classic.Logger = Logger.logger.asInstanceOf[classic.Logger]
       appender.setContext(logger.getLoggerContext)
