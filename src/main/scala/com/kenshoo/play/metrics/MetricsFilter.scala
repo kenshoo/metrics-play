@@ -63,7 +63,7 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
   def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
 
   def requestsTimer: Timer = registry.timer(name(labelPrefix, "request_timer"))
-  def activeRequests: Counter = registry.counter(name(labelPrefix, "active_tequest"))
+  def activeRequests: Counter = registry.counter(name(labelPrefix, "active_requests"))
   def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
 
   def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
