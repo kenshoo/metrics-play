@@ -28,6 +28,8 @@ libraryDependencies ++= Seq(
     "org.specs2" %% "specs2" % "2.3.12" % "test"
 )
 
+parallelExecution in Test := false
+
 publishMavenStyle := true
 
 publishTo := Some(if (isSnapshot.value) strikeadSnapshots else strikeadReleases)
