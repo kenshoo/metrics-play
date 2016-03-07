@@ -37,8 +37,7 @@ class DisabledMetricsFilter @Inject() extends MetricsFilter {
 }
 
 class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuration) extends MetricsFilter {
-
-  def registry: MetricRegistry = metrics.defaultRegistry
+  val registry = metrics.defaultRegistry
 
   /** Specify a meaningful prefix for metrics
     *
@@ -46,7 +45,7 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
     * this was the original set value.
     *
     */
-  def labelPrefix: String = configuration.getString("metrics.naming.http").getOrElse(classOf[MetricsFilter].getName)
+  val labelPrefix = configuration.getString("metrics.naming.http").getOrElse(classOf[MetricsFilter].getName)
 
   /** Specify which HTTP status codes have individual metrics
     *
@@ -55,19 +54,15 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
     * Defaults to 200, 400, 401, 403, 404, 409, 201, 304, 307, 500, which is compatible
     * with prior releases.
     */
-  def knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
+  val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
     Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
     Status.UNAUTHORIZED, Status.NOT_MODIFIED)
-
-
-  def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
-
-  def requestsTimer: Timer = registry.timer(name(labelPrefix, "request_timer"))
-  def activeRequests: Counter = registry.counter(name(labelPrefix, "active_requests"))
-  def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
+  val statusCodes = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
+  val requestsTimer = registry.timer(name(labelPrefix, "request_timer"))
+  val activeRequests = registry.counter(name(labelPrefix, "active_requests"))
+  val otherStatuses = registry.meter(name(labelPrefix, "other"))
 
   def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-
     val context = requestsTimer.time()
 
     def logCompleted(result: Result): Unit = {
