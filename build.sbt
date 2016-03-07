@@ -2,7 +2,7 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-version := "2.4.6.0-SNAPSHOT"
+version := "2.5.0.0-SNAPSHOT"
 
 scalaVersion := "2.11.7"
 
@@ -22,9 +22,9 @@ libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-json" % "3.1.2",
     "io.dropwizard.metrics" % "metrics-jvm" % "3.1.2",
     "io.dropwizard.metrics" % "metrics-logback" % "3.1.2",
-    "com.typesafe.play" %% "play" % "2.4.6" % "provided",
-    "com.typesafe.play" %% "play-test" % "2.4.6" % "test",
-    "com.typesafe.play" %% "play-specs2" % "2.4.6" % "test",
+    "com.typesafe.play" %% "play" % "2.5.0" % "provided",
+    "com.typesafe.play" %% "play-test" % "2.5.0" % "test",
+    "com.typesafe.play" %% "play-specs2" % "2.5.0" % "test",
     "org.specs2" %% "specs2" % "2.3.12" % "test"
 )
 
