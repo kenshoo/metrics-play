@@ -2,8 +2,6 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-version := "2.5.0.0-SNAPSHOT"
-
 scalaVersion := "2.11.7"
 
 testOptions in Test += Tests.Argument("junitxml", "console")
