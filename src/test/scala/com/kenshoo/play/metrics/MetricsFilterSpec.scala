@@ -79,7 +79,7 @@ object MetricsFilterSpec extends Specification {
 
     "increment request timer" in withApplication(Ok("")) { implicit app =>
       Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
-      val timer = metrics.defaultRegistry.timer(MetricRegistry.name(labelPrefix, "requestTimer"))
+      val timer = metrics.defaultRegistry.timer(MetricRegistry.name(labelPrefix, "request_timer"))
       timer.getCount must beGreaterThan(0L)
     }
   }
