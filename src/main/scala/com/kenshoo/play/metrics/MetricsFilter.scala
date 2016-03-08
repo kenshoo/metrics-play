@@ -70,8 +70,8 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
 
       def logCompleted(result: Result): Unit = {
         activeRequests.dec()
-        context.stop()
         statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+        context.stop()
       }
 
       activeRequests.inc()
