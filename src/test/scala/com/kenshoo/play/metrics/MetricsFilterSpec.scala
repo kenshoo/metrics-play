@@ -16,7 +16,6 @@
 package com.kenshoo.play.metrics
 
 import javax.inject.Inject
-
 import org.specs2.mutable.Specification
 import play.api.Application
 import play.api.http.HttpFilters
@@ -40,7 +39,6 @@ object MetricsFilterSpec extends Specification {
   }
 
   def withApplication[T](result: => Result)(block: Application => T): T = {
-
     lazy val application = new GuiceApplicationBuilder()
       .overrides(
         bind[Router].to(Router.from {
@@ -50,33 +48,30 @@ object MetricsFilterSpec extends Specification {
         bind[MetricsFilter].to[MetricsFilterImpl],
         bind[Metrics].to[MetricsImpl]
       ).build()
-
-    running(application){block(application)}
+    running(application){
+      block(application)
+    }
   }
 
-  def metrics(implicit app: Application) = app.injector.instanceOf[Metrics]
+  def metrics(implicit app: Application): Metrics = app.injector.instanceOf[Metrics]
 
   val labelPrefix = classOf[MetricsFilter].getName
 
   "MetricsFilter" should {
-
     "return passed response code" in withApplication(Ok("")) { _ =>
       val result = route(FakeRequest()).get
       status(result) must equalTo(OK)
     }
-
     "increment status code counter" in withApplication(Ok("")) { implicit app =>
       Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
       val meter = metrics.defaultRegistry.meter(MetricRegistry.name(labelPrefix, "200"))
       meter.getCount must equalTo(1)
     }
-
     "increment status code counter for uncaught exceptions" in withApplication(throw new RuntimeException("")) { implicit app =>
       Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
       val meter = metrics.defaultRegistry.meter(MetricRegistry.name(labelPrefix, "500"))
       meter.getCount must equalTo(1)
     }
-
     "increment request timer" in withApplication(Ok("")) { implicit app =>
       Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
       val timer = metrics.defaultRegistry.timer(MetricRegistry.name(labelPrefix, "request_timer"))

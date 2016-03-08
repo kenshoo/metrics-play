@@ -15,29 +15,27 @@
 */
 package com.kenshoo.play.metrics
 
+import java.util.concurrent.Executor
 import javax.inject.Inject
-
-import akka.stream.Materializer
+import akka.util.ByteString
 import play.api.Configuration
+import play.api.libs.streams.Accumulator
 import play.api.mvc._
 import play.api.http.Status
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
+import scala.concurrent.ExecutionContext
 
-import scala.concurrent.Future
+trait MetricsFilter extends EssentialFilter
 
-
-trait MetricsFilter extends Filter
-
-class DisabledMetricsFilter @Inject() (implicit val mat: Materializer) extends MetricsFilter {
-  def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    nextFilter(rh)
+class DisabledMetricsFilter @Inject() extends MetricsFilter {
+  def apply(nextFilter: EssentialAction) = new EssentialAction {
+    override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
+      nextFilter(rh)
+    }
   }
 }
 
-class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuration)(implicit val mat: Materializer) extends MetricsFilter {
+class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuration) extends MetricsFilter {
   val registry = metrics.defaultRegistry
 
   /** Specify a meaningful prefix for metrics
@@ -62,26 +60,30 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
   val requestsTimer = registry.timer(name(labelPrefix, "request_timer"))
   val activeRequests = registry.counter(name(labelPrefix, "active_requests"))
   val otherStatuses = registry.meter(name(labelPrefix, "other"))
+  val onSameThreadExecutionContext = ExecutionContext.fromExecutor(new Executor {
+    override def execute(command: Runnable): Unit = command.run()
+  })
 
-  def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    val context = requestsTimer.time()
+  def apply(nextFilter: EssentialAction) = new EssentialAction {
+    override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
+      val context = requestsTimer.time()
 
-    def logCompleted(result: Result): Unit = {
-      activeRequests.dec()
-      context.stop()
-      statusCodes.getOrElse(result.header.status, otherStatuses).mark()
-    }
-
-    activeRequests.inc()
-    nextFilter(rh).transform(
-      result => {
-        logCompleted(result)
-        result
-      },
-      exception => {
-        logCompleted(Results.InternalServerError)
-        exception
+      def logCompleted(result: Result): Unit = {
+        activeRequests.dec()
+        context.stop()
+        statusCodes.getOrElse(result.header.status, otherStatuses).mark()
       }
-    )
+
+      activeRequests.inc()
+      nextFilter(rh).map {
+        result =>
+          logCompleted(result)
+          result
+      }(onSameThreadExecutionContext).recover {
+        case ex: Throwable =>
+          logCompleted(Results.InternalServerError)
+          throw ex
+      }(onSameThreadExecutionContext)
+    }
   }
 }
