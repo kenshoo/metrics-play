@@ -15,29 +15,31 @@
 */
 package com.kenshoo.play.metrics
 
+import java.util.concurrent.Executor
 import javax.inject.Inject
-
+import akka.stream.scaladsl.Flow
+import akka.util.ByteString
+import play.api.Configuration
+import play.api.http.HttpEntity.{Streamed, Chunked}
+import play.api.libs.streams.Accumulator
+import play.api.mvc.Results._
 import play.api.mvc._
-import play.api.http.Status
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import com.codahale.metrics._
+import play.api.http.{HttpChunk, Status}
 import com.codahale.metrics.MetricRegistry.name
+import scala.concurrent.ExecutionContext
 
-import scala.concurrent.Future
-
-
-trait MetricsFilter extends Filter
+trait MetricsFilter extends EssentialFilter
 
 class DisabledMetricsFilter @Inject() extends MetricsFilter {
-  def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    nextFilter(rh)
+  def apply(nextFilter: EssentialAction) = new EssentialAction {
+    override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
+      nextFilter(rh)
+    }
   }
 }
 
-class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
-
-  def registry: MetricRegistry = metrics.defaultRegistry
+class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuration) extends MetricsFilter {
+  val registry = metrics.defaultRegistry
 
   /** Specify a meaningful prefix for metrics
     *
@@ -45,7 +47,7 @@ class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
     * this was the original set value.
     *
     */
-  def labelPrefix: String = classOf[MetricsFilter].getName
+  val labelPrefix = configuration.getString("metrics.naming.http").getOrElse(classOf[MetricsFilter].getName)
 
   /** Specify which HTTP status codes have individual metrics
     *
@@ -54,37 +56,50 @@ class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
     * Defaults to 200, 400, 401, 403, 404, 409, 201, 304, 307, 500, which is compatible
     * with prior releases.
     */
-  def knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
+  val knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
     Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
     Status.UNAUTHORIZED, Status.NOT_MODIFIED)
+  val statusCodes = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
+  val requestsTimer = registry.timer(name(labelPrefix, "request_timer"))
+  val activeRequests = registry.counter(name(labelPrefix, "active_requests"))
+  val otherStatuses = registry.meter(name(labelPrefix, "other"))
+  val onSameThreadExecutionContext = ExecutionContext.fromExecutor(new Executor {
+    override def execute(command: Runnable): Unit = command.run()
+  })
 
+  def apply(nextFilter: EssentialAction) = new EssentialAction {
+    override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
+      val context = requestsTimer.time()
 
-  def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
-
-  def requestsTimer: Timer = registry.timer(name(labelPrefix, "requestTimer"))
-  def activeRequests: Counter = registry.counter(name(labelPrefix, "activeRequests"))
-  def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
-
-  def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-
-    val context = requestsTimer.time()
-
-    def logCompleted(result: Result): Unit = {
-      activeRequests.dec()
-      context.stop()
-      statusCodes.getOrElse(result.header.status, otherStatuses).mark()
-    }
-
-    activeRequests.inc()
-    nextFilter(rh).transform(
-      result => {
-        logCompleted(result)
-        result
-      },
-      exception => {
-        logCompleted(Results.InternalServerError)
-        exception
+      def logCompleted(result: Result): Unit = {
+        activeRequests.dec()
+        statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+        context.stop()
       }
-    )
+
+      activeRequests.inc()
+      nextFilter(rh).map {
+        result =>
+          result.body match {
+            case c: Chunked =>
+              result.copy(body = c.copy(chunks = c.chunks.via(Flow[HttpChunk].watchTermination() { (m, f) =>
+                f.onComplete(_ => logCompleted(result))(onSameThreadExecutionContext)
+                m
+              })))
+            case c: Streamed =>
+              result.copy(body = c.copy(data = c.data.via(Flow[ByteString].watchTermination() { (m, f) =>
+                f.onComplete(_ => logCompleted(result))(onSameThreadExecutionContext)
+                m
+              })))
+            case _ =>
+              logCompleted(result)
+              result
+          }
+      }(onSameThreadExecutionContext).recover {
+        case ex: Throwable =>
+          logCompleted(Results.InternalServerError)
+          throw ex
+      }(onSameThreadExecutionContext)
+    }
   }
 }
