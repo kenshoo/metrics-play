@@ -17,11 +17,14 @@ package com.kenshoo.play.metrics
 
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import akka.stream.scaladsl.Flow
 import akka.util.ByteString
 import play.api.Configuration
+import play.api.http.HttpEntity.{Streamed, Chunked}
 import play.api.libs.streams.Accumulator
+import play.api.mvc.Results._
 import play.api.mvc._
-import play.api.http.Status
+import play.api.http.{HttpChunk, Status}
 import com.codahale.metrics.MetricRegistry.name
 import scala.concurrent.ExecutionContext
 
@@ -77,8 +80,21 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
       activeRequests.inc()
       nextFilter(rh).map {
         result =>
-          logCompleted(result)
-          result
+          result.body match {
+            case c: Chunked =>
+              result.copy(body = c.copy(chunks = c.chunks.via(Flow[HttpChunk].watchTermination() { (m, f) =>
+                f.onComplete(_ => logCompleted(result))(onSameThreadExecutionContext)
+                m
+              })))
+            case c: Streamed =>
+              result.copy(body = c.copy(data = c.data.via(Flow[ByteString].watchTermination() { (m, f) =>
+                f.onComplete(_ => logCompleted(result))(onSameThreadExecutionContext)
+                m
+              })))
+            case _ =>
+              logCompleted(result)
+              result
+          }
       }(onSameThreadExecutionContext).recover {
         case ex: Throwable =>
           logCompleted(Results.InternalServerError)
