@@ -16,6 +16,7 @@
 package com.kenshoo.play.metrics
 
 import javax.inject.Inject
+import akka.stream.scaladsl.Source
 import org.specs2.mutable.Specification
 import play.api.Application
 import play.api.http.HttpFilters
@@ -58,24 +59,37 @@ object MetricsFilterSpec extends Specification {
   val labelPrefix = classOf[MetricsFilter].getName
 
   "MetricsFilter" should {
-    "return passed response code" in withApplication(Ok("")) { _ =>
-      val result = route(FakeRequest()).get
+    "return passed response code" in withApplication(Ok("")) { app =>
+      val result = route(app, FakeRequest()).get
       status(result) must equalTo(OK)
     }
     "increment status code counter" in withApplication(Ok("")) { implicit app =>
-      Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
+      Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
       val meter = metrics.defaultRegistry.meter(MetricRegistry.name(labelPrefix, "200"))
       meter.getCount must equalTo(1)
     }
     "increment status code counter for uncaught exceptions" in withApplication(throw new RuntimeException("")) { implicit app =>
-      Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
+      Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
       val meter = metrics.defaultRegistry.meter(MetricRegistry.name(labelPrefix, "500"))
       meter.getCount must equalTo(1)
     }
     "increment request timer" in withApplication(Ok("")) { implicit app =>
-      Await.ready(route(FakeRequest()).get, Duration(2, "seconds"))
+      Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
       val timer = metrics.defaultRegistry.timer(MetricRegistry.name(labelPrefix, "request_timer"))
-      timer.getCount must beGreaterThan(0L)
+      timer.getCount must equalTo(1)
+    }
+    "active requests counter" in withApplication(Ok("")) { implicit app =>
+      Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
+      val timer = metrics.defaultRegistry.counter(MetricRegistry.name(labelPrefix, "active_requests"))
+      timer.getCount must equalTo(0)
+    }
+    "active requests counter" in withApplication(Ok.chunked(Source.fromIterator(() => List("1", "2", "3").toIterator)
+      .delay(Duration(1, "seconds")))) { implicit app =>
+      val timer = metrics.defaultRegistry.counter(MetricRegistry.name(labelPrefix, "active_requests"))
+      val f = route(app, FakeRequest()).get
+      timer.getCount must equalTo(1)
+      Await.ready(f, Duration(3, "seconds"))
+      timer.getCount must equalTo(0)
     }
   }
 }
