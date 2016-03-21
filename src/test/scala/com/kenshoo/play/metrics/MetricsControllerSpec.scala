@@ -20,15 +20,13 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 class MetricsControllerSpec extends Specification {
-
   "MetricsController" should {
     "return JSON serialized by Metric's toJson with correct headers" in {
-
       val controller = new MetricsController(new Metrics {
         def defaultRegistry = throw new NotImplementedError
+
         def toJson = "{}"
       })
-
       val result = controller.metrics.apply(FakeRequest())
       contentAsString(result) must equalTo("{}")
       contentType(result) must beSome("application/json")
@@ -36,11 +34,8 @@ class MetricsControllerSpec extends Specification {
     }
 
     "return 500 if metrics module is disabled" in {
-
       val controller = new MetricsController(new DisabledMetrics())
-
       val result = controller.metrics.apply(FakeRequest())
-
       status(result) must equalTo(INTERNAL_SERVER_ERROR)
     }
   }
