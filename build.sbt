@@ -2,7 +2,7 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 testOptions in Test += Tests.Argument("junitxml", "console")
 
@@ -24,6 +24,20 @@ libraryDependencies ++= Seq(
     "com.typesafe.play" %% "play-test" % "2.5.0" % "test",
     "com.typesafe.play" %% "play-specs2" % "2.5.0" % "test",
     "org.specs2" %% "specs2" % "2.3.12" % "test"
+)
+
+scalacOptions ++= Seq(
+  "-target:jvm-1.8",
+  "-Ybackend:GenBCode",
+  "-Ydelambdafy:method",
+  "-optimize",
+  "-deprecation",
+  "-unchecked",
+  "-feature",
+  "-language:implicitConversions",
+  "-Xlog-reflective-calls",
+  "-Xfuture",
+  "-Xlint"
 )
 
 parallelExecution in Test := false
