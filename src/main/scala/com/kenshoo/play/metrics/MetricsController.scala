@@ -16,11 +16,9 @@
 package com.kenshoo.play.metrics
 
 import javax.inject.Inject
-
 import play.api.mvc.{Action, Controller}
 
 class MetricsController @Inject() (met: Metrics) extends Controller {
-
   def metrics = Action {
     try {
       Ok(met.toJson)
