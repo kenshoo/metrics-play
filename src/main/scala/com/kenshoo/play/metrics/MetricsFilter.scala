@@ -15,15 +15,15 @@
 */
 package com.kenshoo.play.metrics
 
-import java.util.concurrent.Executor
 import javax.inject.Inject
+import akka.stream.scaladsl.Flow
 import akka.util.ByteString
 import play.api.Configuration
+import play.api.http.HttpEntity.{Streamed, Chunked}
 import play.api.libs.streams.Accumulator
 import play.api.mvc._
-import play.api.http.Status
+import play.api.http.{HttpChunk, Status}
 import com.codahale.metrics.MetricRegistry.name
-import scala.concurrent.ExecutionContext
 
 trait MetricsFilter extends EssentialFilter
 
@@ -60,12 +60,11 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
   val requestsTimer = registry.timer(name(labelPrefix, "request_timer"))
   val activeRequests = registry.counter(name(labelPrefix, "active_requests"))
   val otherStatuses = registry.meter(name(labelPrefix, "other"))
-  val onSameThreadExecutionContext = ExecutionContext.fromExecutor(new Executor {
-    override def execute(command: Runnable): Unit = command.run()
-  })
 
   def apply(nextFilter: EssentialAction) = new EssentialAction {
     override def apply(rh: RequestHeader): Accumulator[ByteString, Result] = {
+      import play.api.libs.iteratee.Execution.Implicits.trampoline
+
       val context = requestsTimer.time()
 
       def logCompleted(result: Result): Unit = {
@@ -77,13 +76,26 @@ class MetricsFilterImpl @Inject() (metrics: Metrics, configuration: Configuratio
       activeRequests.inc()
       nextFilter(rh).map {
         result =>
-          logCompleted(result)
-          result
-      }(onSameThreadExecutionContext).recover {
+          result.body match {
+            case c: Chunked =>
+              result.copy(body = c.copy(chunks = c.chunks.via(Flow[HttpChunk].watchTermination() { (m, f) =>
+                f.onComplete(_ => logCompleted(result))
+                m
+              })))
+            case c: Streamed =>
+              result.copy(body = c.copy(data = c.data.via(Flow[ByteString].watchTermination() { (m, f) =>
+                f.onComplete(_ => logCompleted(result))
+                m
+              })))
+            case _ =>
+              logCompleted(result)
+              result
+          }
+      }.recover {
         case ex: Throwable =>
           logCompleted(Results.InternalServerError)
           throw ex
-      }(onSameThreadExecutionContext)
+      }
     }
   }
 }
