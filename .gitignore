@@ -5,3 +5,6 @@ logs/
 /bin/
 /.classpath
 /.project
+/.cache-main
+/.cache-tests
+.settings/
