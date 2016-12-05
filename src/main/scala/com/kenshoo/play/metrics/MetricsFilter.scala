@@ -17,6 +17,7 @@ package com.kenshoo.play.metrics
 
 import javax.inject.Inject
 
+import akka.stream.Materializer
 import play.api.mvc._
 import play.api.http.Status
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -29,13 +30,13 @@ import scala.concurrent.Future
 
 trait MetricsFilter extends Filter
 
-class DisabledMetricsFilter @Inject() extends MetricsFilter {
+class DisabledMetricsFilter @Inject() (implicit val mat: Materializer) extends MetricsFilter {
   def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     nextFilter(rh)
   }
 }
 
-class MetricsFilterImpl @Inject() (metrics: Metrics) extends MetricsFilter {
+class MetricsFilterImpl @Inject() (metrics: Metrics) (implicit val mat: Materializer) extends MetricsFilter {
 
   def registry: MetricRegistry = metrics.defaultRegistry
 
