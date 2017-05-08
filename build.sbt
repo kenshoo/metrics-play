@@ -1,9 +1,7 @@
 organization:= "com.kenshoo"
 
 name := "metrics-play"
-
 version := "2.5.0_0.5.0"
-
 scalaVersion := "2.11.8"
 
 testOptions in Test += Tests.Argument("junitxml", "console")
@@ -17,11 +15,11 @@ libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-json" % "3.1.2",
     "io.dropwizard.metrics" % "metrics-jvm" % "3.1.2",
     "io.dropwizard.metrics" % "metrics-logback" % "3.1.2",
-    "com.typesafe.play" %% "play" % "2.5.9" % "provided",
+    "com.typesafe.play" %% "play" % "2.5.14" % "provided",
     "org.joda" % "joda-convert" % "1.2",
     //test
-    "com.typesafe.play" %% "play-test" % "2.5.9" % "test",
-    "com.typesafe.play" %% "play-specs2" % "2.5.9" % "test",
+    "com.typesafe.play" %% "play-test" % "2.5.14" % "test",
+    "com.typesafe.play" %% "play-specs2" % "2.5.14" % "test",
     "org.specs2" %% "specs2" % "2.3.12" % "test"
 )
 
