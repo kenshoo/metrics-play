@@ -2,29 +2,33 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-version := "2.4.0_0.4.1"
+version := "2.5.9_0.5.1"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.10.4", "2.11.6")
+crossScalaVersions := Seq("2.11.8")
 
 testOptions in Test += Tests.Argument("junitxml", "console")
+
+parallelExecution in Test := false
 
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
+resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.11"
+
 libraryDependencies ++= Seq(
-    "io.dropwizard.metrics" % "metrics-core" % "3.1.2",
-    "io.dropwizard.metrics" % "metrics-json" % "3.1.2",
-    "io.dropwizard.metrics" % "metrics-jvm" % "3.1.2",
-    "io.dropwizard.metrics" % "metrics-logback" % "3.1.2",
-    "com.typesafe.play" %% "play" % "2.4.0" % "provided",
+    "io.dropwizard.metrics" % "metrics-core" % "3.2.2",
+    "io.dropwizard.metrics" % "metrics-json" % "3.2.2",
+    "io.dropwizard.metrics" % "metrics-jvm" % "3.2.2",
+    "io.dropwizard.metrics" % "metrics-logback" % "3.2.2",
+    "com.typesafe.play" %% "play" % "2.5.9" % "provided",
     "org.joda" % "joda-convert" % "1.2",
     //test
-    "com.typesafe.play" %% "play-test" % "2.4.0" % "test",
-    "com.typesafe.play" %% "play-specs2" % "2.4.0" % "test",
-    "org.specs2" %% "specs2" % "2.3.12" % "test"
+    "com.typesafe.play" %% "play-test" % "2.5.9" % "test",
+    "com.typesafe.play" %% "play-specs2" % "2.5.9" % "test",
+    "org.specs2" %% "specs2" % "2.4.15" % "test"
 )
 
 publishMavenStyle := true
