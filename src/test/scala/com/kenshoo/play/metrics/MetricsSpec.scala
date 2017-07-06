@@ -27,17 +27,17 @@ class MetricsSpec extends Specification {
 
     "serialize to JSON" in withApplication(Map.empty) { implicit app =>
       val jsValue: JsValue = Json.parse(metrics.toJson)
-      (jsValue \ "version").as[String] mustEqual "3.0.0"
+      (jsValue \ "version").as[String] mustEqual "3.1.3"
     }
 
-    "be able to add custom counter" in withApplication(Map.empty) { implicit app =>
+    "be able to add custom counter" in withApplication(Map("metrics.jvm" -> false)) { implicit app =>
       metrics.defaultRegistry.counter("my-counter").inc()
 
       val jsValue: JsValue = Json.parse(metrics.toJson)
       (jsValue \ "counters" \ "my-counter" \ "count").as[Int] mustEqual(1)
     }
 
-    "contain JVM metrics" in withApplication(Map.empty) { implicit app =>
+    "contain JVM metrics" in withApplication(Map("metrics.jvm" -> true)) { implicit app =>
       metrics.defaultRegistry.getGauges.asScala must haveKey("jvm.attribute.name")
     }
 
