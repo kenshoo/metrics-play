@@ -33,13 +33,14 @@ libraryDependencies ++= Seq(
 
 publishMavenStyle := true
 
-publishTo <<= version { (v: String) =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
-    Some("snapshots" at nexus + "content/repositories/snapshots")
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
   else
-    Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+    Opts.resolver.sonatypeStaging
+)
+
+credentials += Credentials(Path.userHome / ".m2" / ".credentials")
 
 pomIncludeRepository := { _ => false }
 
@@ -47,26 +48,35 @@ publishArtifact in Test := false
 
 pomExtra := (
   <url>https://github.com/kenshoo/metrics-play</url>
-  <inceptionYear>2013</inceptionYear>
-  <licenses>
-    <license>
-      <name>Apache 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-      <comments>A business-friendly OSS license</comments>
-    </license>
-  </licenses>
-  <scm>
-    <url>git@github.com:kenshoo/metrics-play.git</url>
-    <connection>scm:git@github.com:kenshoo/metrics-play.git</connection>
-  </scm>
-  <developers>
-    <developer>
-      <name>Lior Harel</name>
-      <email>harel.lior@gmail.com</email>
-      <roles>
-        <role>Author</role>
-      </roles>
-      <organization>Kenshoo</organization>
-    </developer>
-  </developers>)
+    <inceptionYear>2013</inceptionYear>
+    <licenses>
+      <license>
+        <name>Apache 2</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+        <comments>A business-friendly OSS license</comments>
+      </license>
+    </licenses>
+    <scm>
+      <url>git@github.com:kenshoo/metrics-play.git</url>
+      <connection>scm:git@github.com:kenshoo/metrics-play.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <name>Ran Nisim</name>
+        <email>rannisim@gmail.com</email>
+        <roles>
+          <role>Author</role>
+        </roles>
+        <organization>Kenshoo</organization>
+      </developer>
+      <developer>
+        <name>Lior Harel</name>
+        <email>harel.lior@gmail.com</email>
+        <roles>
+          <role>Author</role>
+        </roles>
+        <organization>Kenshoo</organization>
+      </developer>
+    </developers>
+  )
