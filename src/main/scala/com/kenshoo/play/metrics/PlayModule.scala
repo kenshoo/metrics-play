@@ -5,7 +5,7 @@ import play.api.inject.Module
 
 class PlayModule extends Module {
   def bindings(environment: Environment, configuration: Configuration) = {
-    if (configuration.getBoolean("metrics.enabled").getOrElse(true)) {
+    if (configuration.get[Boolean]("metrics.enabled")) {
       Seq(
         bind[MetricsFilter].to[MetricsFilterImpl].eagerly,
         bind[Metrics].to[MetricsImpl].eagerly

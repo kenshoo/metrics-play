@@ -16,18 +16,18 @@
 package com.kenshoo.play.metrics
 
 import org.specs2.mutable.Specification
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 
-class MetricsControllerSpec extends Specification {
+
+class MetricsControllerSpec extends Specification  {
 
   "MetricsController" should {
     "return JSON serialized by Metric's toJson with correct headers" in {
-
       val controller = new MetricsController(new Metrics {
         def defaultRegistry = throw new NotImplementedError
         def toJson = "{}"
-      })
+      }, Helpers.stubControllerComponents())
 
       val result = controller.metrics.apply(FakeRequest())
       contentAsString(result) must equalTo("{}")
@@ -37,7 +37,7 @@ class MetricsControllerSpec extends Specification {
 
     "return 500 if metrics module is disabled" in {
 
-      val controller = new MetricsController(new DisabledMetrics())
+      val controller = new MetricsController(new DisabledMetrics(), Helpers.stubControllerComponents())
 
       val result = controller.metrics.apply(FakeRequest())
 
