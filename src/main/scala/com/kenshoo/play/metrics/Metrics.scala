@@ -26,14 +26,14 @@ trait Metrics {
 @Singleton
 class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Configuration) extends Metrics {
 
-  val validUnits = Some(Set("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS"))
+  val validUnits = Set("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS")
 
-  val registryName = configuration.getString("metrics.name").getOrElse("default")
-  val rateUnit = configuration.getString("metrics.rateUnit", validUnits).getOrElse("SECONDS")
-  val durationUnit = configuration.getString("metrics.durationUnit", validUnits).getOrElse("SECONDS")
-  val showSamples  = configuration.getBoolean("metrics.showSamples").getOrElse(false)
-  val jvmMetricsEnabled = configuration.getBoolean("metrics.jvm").getOrElse(true)
-  val logbackEnabled = configuration.getBoolean("metrics.logback").getOrElse(true)
+  val registryName = configuration.get[String]("metrics.name")
+  val rateUnit = configuration.getAndValidate[String]("metrics.rateUnit", validUnits)
+  val durationUnit = configuration.getAndValidate[String]("metrics.durationUnit", validUnits)
+  val showSamples  = configuration.get[Boolean]("metrics.showSamples")
+  val jvmMetricsEnabled = configuration.get[Boolean]("metrics.jvm")
+  val logbackEnabled = configuration.get[Boolean]("metrics.logback")
 
   val mapper: ObjectMapper = new ObjectMapper()
 

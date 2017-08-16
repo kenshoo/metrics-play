@@ -20,12 +20,10 @@ import javax.inject.Inject
 import akka.stream.Materializer
 import play.api.mvc._
 import play.api.http.Status
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import com.codahale.metrics._
 import com.codahale.metrics.MetricRegistry.name
 
-import scala.concurrent.Future
-
+import scala.concurrent.{ExecutionContext, Future}
 
 trait MetricsFilter extends Filter
 
@@ -35,7 +33,7 @@ class DisabledMetricsFilter @Inject()(implicit val mat: Materializer) extends Me
   }
 }
 
-class MetricsFilterImpl @Inject() (metrics: Metrics)(implicit val mat: Materializer) extends MetricsFilter {
+class MetricsFilterImpl @Inject() (metrics: Metrics)(implicit val mat: Materializer, val ec: ExecutionContext) extends MetricsFilter {
 
   def registry: MetricRegistry = metrics.defaultRegistry
 
