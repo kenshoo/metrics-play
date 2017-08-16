@@ -4,9 +4,6 @@ scala:
 jdk:
   - oraclejdk8
 script:
-  - sbt clean coverage test
-
-before_install:
-  - pip install --user codecov
+  - sbt clean coverage test coverageReport
 after_success:
-  - codecov
+  - bash <(curl -s https://codecov.io/bash)
