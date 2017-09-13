@@ -43,7 +43,7 @@ class MetricsFilterImpl @Inject() (metrics: Metrics)(implicit val mat: Materiali
     * this was the original set value.
     *
     */
-  def labelPrefix: String = classOf[MetricsFilter].getName
+  def labelPrefix: String = metrics.configuration.getOptional[String]("metrics.labelPrefix").getOrElse(classOf[MetricsFilter].getName)
 
   /** Specify which HTTP status codes have individual metrics
     *

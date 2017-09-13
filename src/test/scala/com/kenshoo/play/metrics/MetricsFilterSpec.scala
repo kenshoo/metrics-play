@@ -42,9 +42,10 @@ object MetricsFilterSpec extends Specification {
     def filters = Seq(metricsFilter)
   }
 
-  def withApplication[T](result: => Result)(block: Application => T): T = {
+  def withApplication[T](result: => Result, conf: Map[String, Any] = Map.empty)(block: Application => T): T = {
 
     lazy val application = new GuiceApplicationBuilder()
+      .configure(conf)
       .overrides(
         bind[Router].to(Router.from {
           case _ => DefaultActionBuilder(BodyParsers.utils.ignore(AnyContentAsEmpty: AnyContent))(ec) { result }
@@ -84,6 +85,12 @@ object MetricsFilterSpec extends Specification {
       Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
       val timer = metrics.defaultRegistry.timer(MetricRegistry.name(labelPrefix, "requestTimer"))
       timer.getCount must beGreaterThan(0L)
+    }
+
+    "increment custom named counter" in withApplication(Ok(""), Map("metrics.labelPrefix" -> "my.application.name")) { implicit app =>
+      Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
+      val meter = metrics.defaultRegistry.meter(MetricRegistry.name("my.application.name", "200"))
+      meter.getCount must equalTo(1)
     }
   }
 }
