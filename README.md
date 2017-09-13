@@ -59,15 +59,38 @@ To enable the controller add a mapping to conf/routes file
 #### Configuration
 Some configuration is supported through the default configuration file:
 
-    metrics.rateUnit - (default is SECONDS) 
+    metrics.enabled - [true/false] (default is true)
+    
+    metrics.name - (default is "default") Name of the dropwizard metrics registry
+    
+    metrics.labelPrefix - (defaults to classname ("com.kenshoo.play.metrics.MetricsFilter"))
 
-    metrics.durationUnit (default is SECONDS)
+    metrics.rateUnit - (default is "SECONDS")
+
+    metrics.durationUnit (default is "SECONDS")
 
     metrics.showSamples [true/false] (default is false)
 
     metrics.jvm - [true/false] (default is true) controls reporting jvm metrics
   
     metrics.logback - [true/false] (default is true) controls reporing logback metrics
+
+
+#### Name prefix
+By default, metrics are prefixed with the name of the class: "com.kenshoo.play.metrics.MetricsFilter":
+
+```
+"com.kenshoo.play.metrics.MetricsFilter.200" : {
+   "count" : 1584456,
+   "m15_rate" : 1.6800220918042639,
+   "m1_rate" : 1.9015104460758263,
+   "m5_rate" : 1.8138545372237085,
+   "mean_rate" : 3.20162010446889,
+   "units" : "events/second"
+},
+```
+
+You can change the prefix with configuration key `metrics.labelPrefix` 
 
 ### Metrics Filter
 
@@ -85,20 +108,7 @@ An implementation of the Metrics' instrumenting filter for Play2. It records req
 
 ## Advanced usage
 
-By default, metrics are prefixed with "com.kenshoo.play.metrics.MetricsFilter".
-
-```
-"com.kenshoo.play.metrics.MetricsFilter.200" : {
-   "count" : 1584456,
-   "m15_rate" : 1.6800220918042639,
-   "m1_rate" : 1.9015104460758263,
-   "m5_rate" : 1.8138545372237085,
-   "mean_rate" : 3.20162010446889,
-   "units" : "events/second"
-},
-```
-
-You can change the prefix by extending `MetricsFilterImpl`.
+Inherit your own custom filter to implement modifications not available through configuration:
 
 ```scala
 package myapp
@@ -111,9 +121,6 @@ import play.api.inject.Module
 import play.api.{Configuration, Environment}
 
 class MyMetricsFilter @Inject() (metrics: Metrics) extends MetricsFilterImpl(metrics) {
-
-  // configure metrics prefix
-  override def labelPrefix: String = "foobar"
 
   // configure status codes to be monitored. other status codes are labeled as "other"
   override def knownStatuses = Seq(Status.OK)
