@@ -16,6 +16,7 @@
 package com.kenshoo.play.metrics
 
 import org.specs2.mutable.Specification
+import play.api.Configuration
 import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 
@@ -27,6 +28,7 @@ class MetricsControllerSpec extends Specification  {
       val controller = new MetricsController(new Metrics {
         def defaultRegistry = throw new NotImplementedError
         def toJson = "{}"
+        def configuration: Configuration = throw new NotImplementedError
       }, Helpers.stubControllerComponents())
 
       val result = controller.metrics.apply(FakeRequest())
