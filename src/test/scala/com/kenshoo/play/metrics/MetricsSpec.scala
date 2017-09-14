@@ -10,12 +10,12 @@ import scala.collection.JavaConverters._
 
 class MetricsSpec extends Specification {
 
-  def withApplication[T](conf: Map[String, Any])(block: Application => T): T = {
+  def withApplication[T](conf: Map[String, Any], enabled: Boolean = true)(block: Application => T): T = {
 
     lazy val application = new GuiceApplicationBuilder()
       .configure(conf)
       .overrides(
-        bind[Metrics].to[MetricsImpl]
+        if (enabled) bind[Metrics].to[MetricsImpl] else bind[Metrics].to[DisabledMetrics]
       ).build()
 
     running(application){block(application)}
@@ -51,6 +51,12 @@ class MetricsSpec extends Specification {
 
     "be able to turn off logback metrics" in withApplication(Map("metrics.logback" -> false)) { implicit app =>
       metrics.defaultRegistry.getMeters.asScala must not haveKey("ch.qos.logback.core.Appender.all")
+    }
+
+    "throw on function calls when metrics is disabled" in withApplication(Map.empty, enabled = false) { implicit app =>
+      metrics.defaultRegistry must throwA[MetricsDisabledException]
+      metrics.configuration must throwA[MetricsDisabledException]
+      metrics.toJson must throwA[MetricsDisabledException]
     }
   }
 }

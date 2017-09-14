@@ -21,10 +21,12 @@ trait Metrics {
   def defaultRegistry: MetricRegistry
 
   def toJson: String
+
+  def configuration: Configuration
 }
 
 @Singleton
-class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Configuration) extends Metrics {
+class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, val configuration: Configuration) extends Metrics {
 
   val validUnits = Set("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS")
 
@@ -89,6 +91,8 @@ class DisabledMetrics @Inject() extends Metrics {
   def defaultRegistry: MetricRegistry = throw new MetricsDisabledException
 
   def toJson: String = throw new MetricsDisabledException
+
+  def configuration: Configuration = throw new MetricsDisabledException
 }
 
 class MetricsDisabledException extends Throwable
