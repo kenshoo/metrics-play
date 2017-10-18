@@ -4,9 +4,9 @@ name := "metrics-play"
 
 version := "2.6.2_0.6.1"
 
-scalaVersion := "2.12.2"
+scalaVersion := "2.12.3"
 
-crossScalaVersions := Seq("2.12.2")
+crossScalaVersions := Seq("2.12.3", "2.11.11")
 
 scalacOptions := Seq("-unchecked", "-deprecation")
 
@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-json" % "3.2.4",
     "io.dropwizard.metrics" % "metrics-jvm" % "3.2.4",
     "io.dropwizard.metrics" % "metrics-logback" % "3.2.4",
-    "com.typesafe.play" %% "play" % "2.6.2" % "provided",
+    "com.typesafe.play" %% "play" % "2.6.6" % "provided",
     "org.joda" % "joda-convert" % "1.8.2",
     //test
     "com.typesafe.play" %% "play-test" % "2.6.2" % "test",
