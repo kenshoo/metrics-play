@@ -34,7 +34,7 @@ add to application.conf the following line
 
 ### Default Registry
 
-To add a custom metrics, you can use `defaultRegistry` which returns an instance of [MetricRegistry](metrics.dropwizard.io/3.2.3/manual/).
+To add a custom metrics, you can use `defaultRegistry` which returns an instance of [MetricRegistry](http://metrics.dropwizard.io/3.2.3/manual/).
 
 ```scala
      import com.kenshoo.play.metrics.Metrics
