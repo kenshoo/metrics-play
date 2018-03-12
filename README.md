@@ -6,7 +6,7 @@ This module provides some support for @codahale [Metrics](https://dropwizard.git
 
 [![codecov.io](https://img.shields.io/codecov/c/gh/kenshoo/metrics-play/master.svg)](https://codecov.io/github/kenshoo/metrics-play/branch/master)
 
-Play Version: 2.6.2, Metrics Version: 3.2.2, Scala Versions: 2.12.2
+Play Version: 2.6.6, Metrics Version: 3.2.4, Scala Versions: 2.12.3
 
 ## Features
 
@@ -22,7 +22,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.6.2_0.6.1"
+    "com.kenshoo" %% "metrics-play" % "2.6.6_0.6.2"
     )
 ```
 
@@ -34,7 +34,7 @@ add to application.conf the following line
 
 ### Default Registry
 
-To add a custom metrics, you can use `defaultRegistry` which returns an instance of [MetricRegistry](http://metrics.dropwizard.io/3.1.0/manual/core/).
+To add a custom metrics, you can use `defaultRegistry` which returns an instance of [MetricRegistry](http://metrics.dropwizard.io/3.2.3/manual/).
 
 ```scala
      import com.kenshoo.play.metrics.Metrics
@@ -48,7 +48,7 @@ To add a custom metrics, you can use `defaultRegistry` which returns an instance
 
 ### Metrics Controller
 
-An implementation of the [metrics-servlet](http://metrics.dropwizard.io/3.1.0/manual/servlets/#metricsservlet) as a play2 controller.
+An implementation of the [metrics-servlet](http://metrics.dropwizard.io/3.2.3/manual/servlets.html) as a play2 controller.
 
 It exports all registered metrics as a json document.
 
