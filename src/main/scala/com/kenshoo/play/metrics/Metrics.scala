@@ -5,16 +5,15 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 
 import ch.qos.logback.classic
-import com.codahale.metrics.json.MetricsModule
-import com.codahale.metrics.jvm.{ThreadStatesGaugeSet, MemoryUsageGaugeSet, GarbageCollectorMetricSet}
-import com.codahale.metrics.logback.InstrumentedAppender
-import com.codahale.metrics.{JvmAttributeGaugeSet, SharedMetricRegistries, MetricRegistry}
-import com.fasterxml.jackson.databind.{ObjectWriter, ObjectMapper}
-import play.api.{Logger, Configuration}
+import com.fasterxml.jackson.databind.{ObjectMapper, ObjectWriter}
+import io.dropwizard.metrics5.json.MetricsModule
+import io.dropwizard.metrics5.jvm.{GarbageCollectorMetricSet, JvmAttributeGaugeSet, MemoryUsageGaugeSet, ThreadStatesGaugeSet}
+import io.dropwizard.metrics5.logback.InstrumentedAppender
+import io.dropwizard.metrics5.{MetricName, MetricRegistry, SharedMetricRegistries}
 import play.api.inject.ApplicationLifecycle
+import play.api.{Configuration, Logger}
 
 import scala.concurrent.Future
-
 
 trait Metrics {
 
@@ -49,10 +48,10 @@ class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Con
 
   def setupJvmMetrics(registry: MetricRegistry) {
     if (jvmMetricsEnabled) {
-      registry.register("jvm.attribute", new JvmAttributeGaugeSet())
-      registry.register("jvm.gc", new GarbageCollectorMetricSet())
-      registry.register("jvm.memory", new MemoryUsageGaugeSet())
-      registry.register("jvm.threads", new ThreadStatesGaugeSet())
+      registry.register(MetricName.build("jvm.attribute"), new JvmAttributeGaugeSet())
+      registry.register(MetricName.build("jvm.gc"), new GarbageCollectorMetricSet())
+      registry.register(MetricName.build("jvm.memory"), new MemoryUsageGaugeSet())
+      registry.register(MetricName.build("jvm.threads"), new ThreadStatesGaugeSet())
     }
   }
 
