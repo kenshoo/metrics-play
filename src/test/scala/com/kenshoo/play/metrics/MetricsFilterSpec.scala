@@ -25,7 +25,7 @@ import play.api.mvc._
 import play.api.routing.Router
 import play.api.test._
 import play.api.test.Helpers._
-import com.codahale.metrics.MetricRegistry
+import io.dropwizard.metrics5.MetricRegistry
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await

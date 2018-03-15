@@ -1,11 +1,13 @@
 package com.kenshoo.play.metrics
 
+import io.dropwizard.metrics5.MetricName
 import org.specs2.mutable.Specification
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
+
 import scala.collection.JavaConverters._
 
 class MetricsSpec extends Specification {
@@ -27,7 +29,7 @@ class MetricsSpec extends Specification {
 
     "serialize to JSON" in withApplication(Map.empty) { implicit app =>
       val jsValue: JsValue = Json.parse(metrics.toJson)
-      (jsValue \ "version").as[String] mustEqual "3.1.3"
+      (jsValue \ "version").as[String] mustEqual "5.0.0"
     }
 
     "be able to add custom counter" in withApplication(Map("metrics.jvm" -> false)) { implicit app =>
@@ -38,19 +40,19 @@ class MetricsSpec extends Specification {
     }
 
     "contain JVM metrics" in withApplication(Map("metrics.jvm" -> true)) { implicit app =>
-      metrics.defaultRegistry.getGauges.asScala must haveKey("jvm.attribute.name")
+      metrics.defaultRegistry.getGauges.asScala must haveKey(MetricName.build("jvm.attribute.name"))
     }
 
     "contain logback metrics" in withApplication(Map.empty) { implicit app =>
-      metrics.defaultRegistry.getMeters.asScala must haveKey("ch.qos.logback.core.Appender.all")
+      metrics.defaultRegistry.getMeters.asScala must haveKey(MetricName.build("ch.qos.logback.core.Appender.all"))
     }
 
     "be able to turn off JVM metrics" in withApplication(Map("metrics.jvm" -> false)) { implicit app =>
-      metrics.defaultRegistry.getGauges.asScala must not haveKey("jvm.attribute.name")
+      metrics.defaultRegistry.getGauges.asScala must not haveKey MetricName.build("jvm.attribute.name")
     }
 
     "be able to turn off logback metrics" in withApplication(Map("metrics.logback" -> false)) { implicit app =>
-      metrics.defaultRegistry.getMeters.asScala must not haveKey("ch.qos.logback.core.Appender.all")
+      metrics.defaultRegistry.getMeters.asScala must not haveKey MetricName.build("ch.qos.logback.core.Appender.all")
     }
   }
 }

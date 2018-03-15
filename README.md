@@ -38,7 +38,7 @@ To add a custom metrics, you can use `defaultRegistry` which returns an instance
 
 ```scala
      import com.kenshoo.play.metrics.Metrics
-     import com.codahale.metrics.Counter
+     import io.dropwizard.metrics5.Counter
 
      class SomeController @Inject() (metrics: Metrics) {
          val counter = metrics.defaultRegistry.counter("name")

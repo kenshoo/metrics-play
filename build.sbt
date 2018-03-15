@@ -10,6 +10,8 @@ val playVersion = "2.6.6"
 
 val metricsPlayVersion = "0.6.2"
 
+val dropWizardMetricsVersion = "5.0.0-rc1"
+
 version := s"${playVersion}_${metricsPlayVersion}"
 
 
@@ -27,10 +29,10 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.12"
 
 libraryDependencies ++= Seq(
-    "io.dropwizard.metrics" % "metrics-core" % "3.2.4",
-    "io.dropwizard.metrics" % "metrics-json" % "3.2.4",
-    "io.dropwizard.metrics" % "metrics-jvm" % "3.2.4",
-    "io.dropwizard.metrics" % "metrics-logback" % "3.2.4",
+    "io.dropwizard.metrics5" % "metrics-core" % dropWizardMetricsVersion,
+    "io.dropwizard.metrics5" % "metrics-json" % dropWizardMetricsVersion,
+    "io.dropwizard.metrics5" % "metrics-jvm" %  dropWizardMetricsVersion,
+    "io.dropwizard.metrics5" % "metrics-logback" % dropWizardMetricsVersion,
     "com.typesafe.play" %% "play" % playVersion % "provided",
     "org.joda" % "joda-convert" % "1.8.2",
     //test

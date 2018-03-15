@@ -20,8 +20,8 @@ import javax.inject.Inject
 import akka.stream.Materializer
 import play.api.mvc._
 import play.api.http.Status
-import com.codahale.metrics._
-import com.codahale.metrics.MetricRegistry.name
+import io.dropwizard.metrics5._
+import io.dropwizard.metrics5.MetricRegistry.name
 
 import scala.concurrent.{ExecutionContext, Future}
 
