@@ -6,7 +6,7 @@ This module provides some support for @codahale [Metrics](https://dropwizard.git
 
 [![codecov.io](https://img.shields.io/codecov/c/gh/kenshoo/metrics-play/master.svg)](https://codecov.io/github/kenshoo/metrics-play/branch/master)
 
-Play Version: 2.6.2, Metrics Version: 3.2.2, Scala Versions: 2.12.2
+Play Version: 2.6.12, Metrics Version: 3.2.2, Scala Versions: 2.12.2
 
 ## Features
 
@@ -22,7 +22,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.6.2_0.6.1"
+    "com.kenshoo" %% "metrics-play" % "2.6.12_0.6.2"
     )
 ```
 
@@ -139,6 +139,7 @@ instead of `com.kenshoo.play.metrics.PlayModule`
 
 ## Changes
 
+* 2.6.12_0.6.2 - Upgrade to Play 2.6.12
 * 2.6.2_0.6.1 - Upgrade to play 2.6 and Scala 2.12. Migration: If you get errors like "No configuration setting found ..." when building fat JARs, check your merge strategy for reference.conf. 
 * 2.4.0_0.4.0 - Re-implement as Play Module
 * 2.4.0_0.3.0 - Upgrade to play 2.4, metrics 3.1.2
