@@ -27,7 +27,7 @@ class MetricsSpec extends Specification {
 
     "serialize to JSON" in withApplication(Map.empty) { implicit app =>
       val jsValue: JsValue = Json.parse(metrics.toJson)
-      (jsValue \ "version").as[String] mustEqual "3.1.3"
+      (jsValue \ "version").as[String] mustEqual "4.0.0"
     }
 
     "be able to add custom counter" in withApplication(Map("metrics.jvm" -> false)) { implicit app =>
