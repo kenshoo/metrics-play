@@ -1,10 +1,10 @@
 package com.kenshoo.play.metrics
 
-import play.api.{Environment, Configuration}
-import play.api.inject.Module
+import play.api.{Configuration, Environment}
+import play.api.inject.{Binding, Module}
 
 class PlayModule extends Module {
-  def bindings(environment: Environment, configuration: Configuration) = {
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
     if (configuration.get[Boolean]("metrics.enabled")) {
       Seq(
         bind[MetricsFilter].to[MetricsFilterImpl].eagerly,
