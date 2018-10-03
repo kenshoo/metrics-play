@@ -36,10 +36,10 @@ libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-logback" % dropwizardVersion,
     "com.typesafe.play" %% "play" % playVersion % Provided,
     "org.joda" % "joda-convert" % "2.1.1",
-    //test
+
+    //Test
     "com.typesafe.play" %% "play-test" % playVersion % Test,
-    "com.typesafe.play" %% "play-specs2" % playVersion % Test,
-    "org.specs2" %% "specs2" % "2.4.17" % "test"
+    "com.typesafe.play" %% "play-specs2" % playVersion % Test
 )
 
 publishMavenStyle := true
