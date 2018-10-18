@@ -68,7 +68,7 @@ class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Con
     }
   }
 
-  def onStart(): ObjectMapper = {
+  def onStart(): Unit = {
 
     setupJvmMetrics(defaultRegistry)
     setupLogbackMetrics(defaultRegistry)
