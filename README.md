@@ -1,12 +1,12 @@
 # metrics-play
 
-This module provides some support for @codahale [Metrics](https://dropwizard.github.io/metrics/3.1.0/) library in a Play2 application (Scala)
+This module provides some support for @codahale [Metrics](https://dropwizard.github.io/metrics/4.0.5/) library in a Play2 application (Scala)
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
 [![codecov.io](https://img.shields.io/codecov/c/gh/kenshoo/metrics-play/master.svg)](https://codecov.io/github/kenshoo/metrics-play/branch/master)
 
-Play Version: 2.6.19, Metrics Version: 4.0.3, Scala Versions: 2.12.6
+Play Version: 2.7.0, Metrics Version: 4.0.5, Scala Versions: 2.12.8
 
 ## Features
 
@@ -22,7 +22,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.6.19_0.7.0"
+    "com.kenshoo" %% "metrics-play" % "2.7.0_0.8.0"
     )
 ```
 
@@ -34,7 +34,7 @@ add to application.conf the following line
 
 ### Default Registry
 
-To add a custom metrics, you can use `defaultRegistry` which returns an instance of [MetricRegistry](http://metrics.dropwizard.io/3.1.0/manual/core/).
+To add a custom metrics, you can use `defaultRegistry` which returns an instance of [MetricRegistry](https://metrics.dropwizard.io/4.0.5/manual/core).
 
 ```scala
      import com.kenshoo.play.metrics.Metrics
@@ -48,25 +48,25 @@ To add a custom metrics, you can use `defaultRegistry` which returns an instance
 
 ### Metrics Controller
 
-An implementation of the [metrics-servlet](http://metrics.dropwizard.io/3.1.0/manual/servlets/#metricsservlet) as a play2 controller.
+An implementation of the [metrics-servlet](https://metrics.dropwizard.io/4.0.5/manual/servlets#metricsservlet) as a play2 controller.
 
 It exports all registered metrics as a json document.
 
 To enable the controller add a mapping to conf/routes file
 
      GET     /admin/metrics              com.kenshoo.play.metrics.MetricsController.metrics
-     
+
 #### Configuration
 Some configuration is supported through the default configuration file:
 
-    metrics.rateUnit - (default is SECONDS) 
+    metrics.rateUnit - (default is SECONDS)
 
     metrics.durationUnit (default is SECONDS)
 
     metrics.showSamples [true/false] (default is false)
 
     metrics.jvm - [true/false] (default is true) controls reporting jvm metrics
-  
+
     metrics.logback - [true/false] (default is true) controls reporing logback metrics
 
 ### Metrics Filter
@@ -139,8 +139,9 @@ instead of `com.kenshoo.play.metrics.PlayModule`
 
 ## Changes
 
+* 2.7.0_0.8.0 - Upgrade to play 2.7.0 and Scala 2.12.8 and dropwizard 4.0.5
 * 2.6.19_0.7.0 - Upgrade to play 2.6.19 and Scala 2.12.6 and dropwizard 4.0.3
-* 2.6.2_0.6.1 - Upgrade to play 2.6 and Scala 2.12. Migration: If you get errors like "No configuration setting found ..." when building fat JARs, check your merge strategy for reference.conf. 
+* 2.6.2_0.6.1 - Upgrade to play 2.6 and Scala 2.12. Migration: If you get errors like "No configuration setting found ..." when building fat JARs, check your merge strategy for reference.conf.
 * 2.4.0_0.4.0 - Re-implement as Play Module
 * 2.4.0_0.3.0 - Upgrade to play 2.4, metrics 3.1.2
 * 2.3.0_0.2.1 - Breaking Change! prefix jvm metric names to standardize with dropwizard

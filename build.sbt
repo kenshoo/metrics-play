@@ -2,15 +2,15 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.11.11")
+crossScalaVersions := Seq(scalaVersion.value, "2.11.12")
 
-val playVersion = "2.6.19"
+val playVersion = "2.7.0"
 
-val metricsPlayVersion = "0.7.0"
+val metricsPlayVersion = "0.8.0"
 
-val dropwizardVersion = "4.0.3"
+val dropwizardVersion = "4.0.5"
 
 version := s"${playVersion}_${metricsPlayVersion}"
 
@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-jvm" % dropwizardVersion,
     "io.dropwizard.metrics" % "metrics-logback" % dropwizardVersion,
     "com.typesafe.play" %% "play" % playVersion % Provided,
-    "org.joda" % "joda-convert" % "2.1.1",
+    "org.joda" % "joda-convert" % "2.2.0",
 
     //Test
     "com.typesafe.play" %% "play-test" % playVersion % Test,
