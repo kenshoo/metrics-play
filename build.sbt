@@ -2,13 +2,13 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.0"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.11.12")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.8")
 
-val playVersion = "2.7.0"
+val playVersion = "2.7.3"
 
-val metricsPlayVersion = "0.8.0"
+val metricsPlayVersion = "0.8.1"
 
 val dropwizardVersion = "4.0.5"
 
