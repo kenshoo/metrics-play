@@ -8,12 +8,11 @@ crossScalaVersions := Seq(scalaVersion.value, "2.12.8")
 
 val playVersion = "2.7.3"
 
-val metricsPlayVersion = "0.8.1"
+val metricsPlayVersion = "0.8.2"
 
 val dropwizardVersion = "4.0.5"
 
 version := s"${playVersion}_${metricsPlayVersion}"
-
 
 
 scalacOptions := Seq("-unchecked", "-deprecation")

@@ -22,7 +22,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.7.3_0.8.1"
+    "com.kenshoo" %% "metrics-play" % "2.7.3_0.8.2"
     )
 ```
 
@@ -137,6 +137,7 @@ play.modules.enabled+="myapp.MyMetricsModule"
 
 ## Changes
 
+* 2.7.3_0.8.2 - Minor compatability fix for Play 2.8
 * 2.7.3_0.8.1 - Upgrade to play 2.7.3 and support Scala version 2.12.8 / 2.13.0 with dropwizard 4.0.5
 * 2.7.0_0.8.0 - Upgrade to play 2.7.0 and Scala 2.12.8 and dropwizard 4.0.5
 * 2.6.19_0.7.0 - Upgrade to play 2.6.19 and Scala 2.12.6 and dropwizard 4.0.3
