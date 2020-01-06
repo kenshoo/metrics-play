@@ -27,6 +27,8 @@ trait Metrics {
 @Singleton
 class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Configuration) extends Metrics {
 
+  private val innerLogger: Logger = Logger(classOf[MetricsImpl])
+
   val validUnits = Set("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS")
 
   val registryName: String = configuration.get[String]("metrics.name")
@@ -61,7 +63,7 @@ class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Con
     if (logbackEnabled) {
       val appender: InstrumentedAppender = new InstrumentedAppender(registry)
 
-      val logger: classic.Logger = Logger.logger.asInstanceOf[classic.Logger]
+      val logger: classic.Logger = innerLogger.logger.asInstanceOf[classic.Logger]
       appender.setContext(logger.getLoggerContext)
       appender.start()
       logger.addAppender(appender)
