@@ -27,7 +27,7 @@ trait Metrics {
 @Singleton
 class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Configuration) extends Metrics {
 
-  private val innerLogger: Logger = Logger("metrics")
+  private val innerLogger: Logger = Logger(classOf[MetricsImpl])
 
   val validUnits = Set("NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS", "MINUTES", "HOURS", "DAYS")
 
