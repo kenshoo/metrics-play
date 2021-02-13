@@ -6,7 +6,7 @@ This module provides some support for @codahale [Metrics](https://dropwizard.git
 
 [![codecov.io](https://img.shields.io/codecov/c/gh/kenshoo/metrics-play/master.svg)](https://codecov.io/github/kenshoo/metrics-play/branch/master)
 
-Play Version: 2.7.0, Metrics Version: 4.0.5, Scala Versions: 2.12.8
+Play Version: 2.8.6, Metrics Version: 4.1.17, Scala Versions: 2.13.4
 
 ## Features
 
@@ -22,7 +22,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "2.7.3_0.8.2"
+    "com.kenshoo" %% "metrics-play" % "2.8.6_0.8.0"
     )
 ```
 
@@ -137,6 +137,7 @@ play.modules.enabled+="myapp.MyMetricsModule"
 
 ## Changes
 
+* 2.8.6_0.8.0 - Play 2.8, Scala 2.13.4, Dropwizard 4.1.17
 * 2.7.3_0.8.2 - Minor compatability fix for Play 2.8
 * 2.7.3_0.8.1 - Upgrade to play 2.7.3 and support Scala version 2.12.8 / 2.13.0 with dropwizard 4.0.5
 * 2.7.0_0.8.0 - Upgrade to play 2.7.0 and Scala 2.12.8 and dropwizard 4.0.5

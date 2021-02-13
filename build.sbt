@@ -2,15 +2,15 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-scalaVersion := "2.13.0"
+scalaVersion := "2.13.4"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.12.8")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.13")
 
-val playVersion = "2.7.3"
+val playVersion = "2.8.6"
 
-val metricsPlayVersion = "0.8.2"
+val metricsPlayVersion = "0.8.0"
 
-val dropwizardVersion = "4.0.5"
+val dropwizardVersion = "4.1.17"
 
 version := s"${playVersion}_${metricsPlayVersion}"
 
@@ -21,11 +21,11 @@ testOptions in Test += Tests.Argument("junitxml", "console")
 
 parallelExecution in Test := false
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
-resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.12"
+resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.13"
 
 
 libraryDependencies ++= Seq(
