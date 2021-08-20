@@ -50,7 +50,7 @@ class MetricsImpl @Inject() (lifecycle: ApplicationLifecycle, configuration: Con
 
   def defaultRegistry: MetricRegistry = SharedMetricRegistries.getOrCreate(registryName)
 
-  def setupJvmMetrics(registry: MetricRegistry) {
+  def setupJvmMetrics(registry: MetricRegistry): Unit = {
     if (jvmMetricsEnabled) {
       registry.register("jvm.attribute", new JvmAttributeGaugeSet())
       registry.register("jvm.gc", new GarbageCollectorMetricSet())
