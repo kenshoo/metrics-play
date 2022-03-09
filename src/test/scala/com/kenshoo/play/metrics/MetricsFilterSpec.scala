@@ -15,22 +15,20 @@
 */
 package com.kenshoo.play.metrics
 
-import javax.inject.Inject
-
 import org.specs2.mutable.Specification
 import play.api.Application
 import play.api.http.HttpFilters
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.routing.Router
-import play.api.test._
 import play.api.test.Helpers._
-import com.codahale.metrics.MetricRegistry
+import play.api.test._
 
-import scala.concurrent.duration.Duration
+import javax.inject.Inject
 import scala.concurrent.Await
-import play.api.inject.bind
-import play.api.mvc.Results._
+import scala.concurrent.duration.Duration
 
 // inspired by Play's SecurityHeadersFilterSpec.scala
 object MetricsFilterSpec extends Specification {
@@ -38,7 +36,7 @@ object MetricsFilterSpec extends Specification {
 
   val ec = scala.concurrent.ExecutionContext.Implicits.global
 
-  class Filters @Inject() (metricsFilter: MetricsFilter) extends HttpFilters {
+  class Filters @Inject()(metricsFilter: MetricsFilter) extends HttpFilters {
     def filters = Seq(metricsFilter)
   }
 
@@ -47,14 +45,18 @@ object MetricsFilterSpec extends Specification {
     lazy val application = new GuiceApplicationBuilder()
       .overrides(
         bind[Router].to(Router.from {
-          case _ => DefaultActionBuilder(BodyParsers.utils.ignore(AnyContentAsEmpty: AnyContent))(ec) { result }
+          case _ => DefaultActionBuilder(BodyParsers.utils.ignore(AnyContentAsEmpty: AnyContent))(ec) {
+            result
+          }
         }),
         bind[HttpFilters].to[Filters],
         bind[MetricsFilter].to[MetricsFilterImpl],
         bind[Metrics].to[MetricsImpl]
       ).build()
 
-    running(application){block(application)}
+    running(application) {
+      block(application)
+    }
   }
 
   def metrics(implicit app: Application) = app.injector.instanceOf[Metrics]
@@ -70,20 +72,20 @@ object MetricsFilterSpec extends Specification {
 
     "increment status code counter" in withApplication(Ok("")) { implicit app =>
       Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
-      val meter = metrics.defaultRegistry.meter(MetricRegistry.name(labelPrefix, "200"))
-      meter.getCount must equalTo(1)
+      val meter = metrics.defaultRegistry.counter(s"$labelPrefix.200")
+      meter.count() must equalTo(1)
     }
 
     "increment status code counter for uncaught exceptions" in withApplication(throw new RuntimeException("")) { implicit app =>
       Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
-      val meter = metrics.defaultRegistry.meter(MetricRegistry.name(labelPrefix, "500"))
-      meter.getCount must equalTo(1)
+      val meter = metrics.defaultRegistry.counter(s"$labelPrefix.500")
+      meter.count() must equalTo(1)
     }
 
     "increment request timer" in withApplication(Ok("")) { implicit app =>
       Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
-      val timer = metrics.defaultRegistry.timer(MetricRegistry.name(labelPrefix, "requestTimer"))
-      timer.getCount must beGreaterThan(0L)
+      val timer = metrics.defaultRegistry.timer(s"$labelPrefix.requestTimer")
+      timer.count() must beGreaterThan(0L)
     }
   }
 }
