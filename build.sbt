@@ -4,9 +4,9 @@ name := "metrics-play"
 
 scalaVersion := "2.13.8"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.12.8")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.15")
 
-val playVersion = "2.8.11"
+val playVersion = "2.8.13"
 
 val metricsPlayVersion = "0.9.0-SNAPSHOT"
 
@@ -24,10 +24,6 @@ parallelExecution in Test := false
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= Seq(
-    "io.dropwizard.metrics" % "metrics-core" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-json" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-jvm" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-logback" % dropwizardVersion,
     "com.typesafe.play" %% "play" % playVersion % Provided,
     "org.joda" % "joda-convert" % "2.2.0",
     "io.micrometer" % "micrometer-core" % "1.8.3",

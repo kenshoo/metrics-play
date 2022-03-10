@@ -15,6 +15,8 @@
 */
 package com.kenshoo.play.metrics
 
+import io.micrometer.core.instrument.Clock
+import io.micrometer.jmx.{JmxConfig, JmxMeterRegistry}
 import org.specs2.mutable.Specification
 import play.api.Application
 import play.api.http.HttpFilters
@@ -31,14 +33,15 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 // inspired by Play's SecurityHeadersFilterSpec.scala
-object MetricsFilterSpec extends Specification {
+
+class Filters @Inject()(metricsFilter: MetricsFilter) extends HttpFilters {
+  def filters = Seq(metricsFilter)
+}
+
+class MetricsFilterSpec extends Specification {
   sequential
 
   val ec = scala.concurrent.ExecutionContext.Implicits.global
-
-  class Filters @Inject()(metricsFilter: MetricsFilter) extends HttpFilters {
-    def filters = Seq(metricsFilter)
-  }
 
   def withApplication[T](result: => Result)(block: Application => T): T = {
 
@@ -55,7 +58,16 @@ object MetricsFilterSpec extends Specification {
       ).build()
 
     running(application) {
-      block(application)
+      val defaultRegistry = metrics(application).defaultRegistry
+      val jmxRegistry = new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM)
+      defaultRegistry.add(jmxRegistry)
+      try {
+        block(application)
+      } finally {
+        defaultRegistry.remove(jmxRegistry)
+        defaultRegistry.clear()
+        jmxRegistry.stop()
+      }
     }
   }
 
