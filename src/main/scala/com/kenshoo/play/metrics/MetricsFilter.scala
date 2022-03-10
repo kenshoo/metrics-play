@@ -44,25 +44,9 @@ class MetricsFilterImpl @Inject()(metrics: Metrics)(implicit val mat: Materializ
     */
   def labelPrefix: String = classOf[MetricsFilter].getName
 
-  /** Specify which HTTP status codes have individual metrics
-    *
-    * Statuses not specified here are grouped together under otherStatuses
-    *
-    * Defaults to 200, 400, 401, 403, 404, 409, 201, 304, 307, 500, which is compatible
-    * with prior releases.
-    */
-  def knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
-    Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
-    Status.UNAUTHORIZED, Status.NOT_MODIFIED)
-
-
-  def statusCodes: Map[Int, Counter] = knownStatuses.map(status => status -> registry.counter(s"$labelPrefix.$status")).toMap
-
-  def requestsTimer: Timer = registry.timer(s"$labelPrefix.requestTimer")
+  def requestsTimer(status: Int): Timer = registry.timer(s"$labelPrefix.requestTimer","status",status.toString)
 
   def activeRequests: AtomicInteger = registry.gauge[AtomicInteger](s"$labelPrefix.activeRequests", new AtomicInteger(0), (count: AtomicInteger) => count.get().doubleValue())
-
-  def otherStatuses: Counter = registry.counter(s"$labelPrefix.other")
 
   def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
 
@@ -70,8 +54,7 @@ class MetricsFilterImpl @Inject()(metrics: Metrics)(implicit val mat: Materializ
 
     def logCompleted(result: Result): Unit = {
       activeRequests.decrementAndGet()
-      sample.stop(requestsTimer)
-      statusCodes.getOrElse(result.header.status, otherStatuses).increment()
+      sample.stop(requestsTimer(result.header.status))
     }
 
     activeRequests.incrementAndGet()

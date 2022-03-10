@@ -82,22 +82,16 @@ class MetricsFilterSpec extends Specification {
       status(result) must equalTo(OK)
     }
 
-    "increment status code counter" in withApplication(Ok("")) { implicit app =>
+    "increment request timer for successful status code" in withApplication(Ok("")) { implicit app =>
       Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
-      val meter = metrics.defaultRegistry.counter(s"$labelPrefix.200")
+      val meter = metrics.defaultRegistry.timer(s"$labelPrefix.requestTimer", "status", "200")
       meter.count() must equalTo(1)
     }
 
-    "increment status code counter for uncaught exceptions" in withApplication(throw new RuntimeException("")) { implicit app =>
+    "increment request timer for uncaught exceptions" in withApplication(throw new RuntimeException("")) { implicit app =>
       Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
-      val meter = metrics.defaultRegistry.counter(s"$labelPrefix.500")
+      val meter = metrics.defaultRegistry.timer(s"$labelPrefix.requestTimer", "status", "500")
       meter.count() must equalTo(1)
-    }
-
-    "increment request timer" in withApplication(Ok("")) { implicit app =>
-      Await.ready(route(app, FakeRequest()).get, Duration(2, "seconds"))
-      val timer = metrics.defaultRegistry.timer(s"$labelPrefix.requestTimer")
-      timer.count() must beGreaterThan(0L)
     }
   }
 }
