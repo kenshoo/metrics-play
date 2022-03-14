@@ -1,4 +1,6 @@
 target/
+.bsp/
 .idea/
 .idea_modules/
 logs/
+.DS_Store

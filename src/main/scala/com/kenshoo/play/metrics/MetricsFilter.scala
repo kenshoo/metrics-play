@@ -15,14 +15,13 @@
 */
 package com.kenshoo.play.metrics
 
-import javax.inject.Inject
-
 import akka.stream.Materializer
-import play.api.mvc._
+import io.micrometer.core.instrument.{Counter, MeterRegistry, Timer}
 import play.api.http.Status
-import com.codahale.metrics._
-import com.codahale.metrics.MetricRegistry.name
+import play.api.mvc._
 
+import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MetricsFilter extends Filter
@@ -33,9 +32,9 @@ class DisabledMetricsFilter @Inject()(implicit val mat: Materializer) extends Me
   }
 }
 
-class MetricsFilterImpl @Inject() (metrics: Metrics)(implicit val mat: Materializer, val ec: ExecutionContext) extends MetricsFilter {
+class MetricsFilterImpl @Inject()(metrics: Metrics)(implicit val mat: Materializer, val ec: ExecutionContext) extends MetricsFilter {
 
-  def registry: MetricRegistry = metrics.defaultRegistry
+  def registry: MeterRegistry = metrics.defaultRegistry
 
   /** Specify a meaningful prefix for metrics
     *
@@ -45,35 +44,20 @@ class MetricsFilterImpl @Inject() (metrics: Metrics)(implicit val mat: Materiali
     */
   def labelPrefix: String = classOf[MetricsFilter].getName
 
-  /** Specify which HTTP status codes have individual metrics
-    *
-    * Statuses not specified here are grouped together under otherStatuses
-    *
-    * Defaults to 200, 400, 401, 403, 404, 409, 201, 304, 307, 500, which is compatible
-    * with prior releases.
-    */
-  def knownStatuses = Seq(Status.OK, Status.BAD_REQUEST, Status.FORBIDDEN, Status.NOT_FOUND,
-    Status.CREATED, Status.TEMPORARY_REDIRECT, Status.INTERNAL_SERVER_ERROR, Status.CONFLICT,
-    Status.UNAUTHORIZED, Status.NOT_MODIFIED)
+  def requestsTimer(status: Int): Timer = registry.timer(s"$labelPrefix.requestTimer","status",status.toString)
 
-
-  def statusCodes: Map[Int, Meter] = knownStatuses.map(s => s -> registry.meter(name(labelPrefix, s.toString))).toMap
-
-  def requestsTimer: Timer = registry.timer(name(labelPrefix, "requestTimer"))
-  def activeRequests: Counter = registry.counter(name(labelPrefix, "activeRequests"))
-  def otherStatuses: Meter = registry.meter(name(labelPrefix, "other"))
+  def activeRequests: AtomicInteger = registry.gauge[AtomicInteger](s"$labelPrefix.activeRequests", new AtomicInteger(0), (count: AtomicInteger) => count.get().doubleValue())
 
   def apply(nextFilter: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
 
-    val context = requestsTimer.time()
+    val sample = Timer.start(registry)
 
     def logCompleted(result: Result): Unit = {
-      activeRequests.dec()
-      context.stop()
-      statusCodes.getOrElse(result.header.status, otherStatuses).mark()
+      activeRequests.decrementAndGet()
+      sample.stop(requestsTimer(result.header.status))
     }
 
-    activeRequests.inc()
+    activeRequests.incrementAndGet()
     nextFilter(rh).transform(
       result => {
         logCompleted(result)

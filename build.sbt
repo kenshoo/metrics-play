@@ -2,13 +2,13 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-scalaVersion := "2.13.0"
+scalaVersion := "2.13.8"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.12.8")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.15")
 
-val playVersion = "2.7.3"
+val playVersion = "2.8.13"
 
-val metricsPlayVersion = "0.8.2"
+val metricsPlayVersion = "0.9.0-SNAPSHOT"
 
 val dropwizardVersion = "4.0.5"
 
@@ -21,24 +21,17 @@ testOptions in Test += Tests.Argument("junitxml", "console")
 
 parallelExecution in Test := false
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
-
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
-
-resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.12"
-
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= Seq(
-    "io.dropwizard.metrics" % "metrics-core" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-json" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-jvm" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-logback" % dropwizardVersion,
     "com.typesafe.play" %% "play" % playVersion % Provided,
     "org.joda" % "joda-convert" % "2.2.0",
+    "io.micrometer" % "micrometer-core" % "1.8.3",
 
     //Test
     "com.typesafe.play" %% "play-test" % playVersion % Test,
-    "com.typesafe.play" %% "play-specs2" % playVersion % Test
+    "com.typesafe.play" %% "play-specs2" % playVersion % Test,
+    "io.micrometer" % "micrometer-registry-jmx" % "1.8.3" % Test
 )
 
 publishMavenStyle := true
