@@ -122,6 +122,7 @@ class MetricsImpl @Inject()(lifecycle: ApplicationLifecycle, configuration: Conf
       timeGauge =>
         val timeGaugeNode = timeGaugesNode.putObject(meterName(timeGauge.getId))
         timeGaugeNode.put("value", timeGauge.value(durationUnit))
+        timeGaugeNode.put("duration_units", durationUnit.toString.toLowerCase())
     }
 
     val functionCountersNode = rootNode.putObject("functionCounters")
@@ -137,6 +138,7 @@ class MetricsImpl @Inject()(lifecycle: ApplicationLifecycle, configuration: Conf
         val functionTimerNode = functionTimersNode.putObject(meterName(functionTimer.getId))
         functionTimerNode.put("count", functionTimer.count())
         functionTimerNode.put("mean", functionTimer.mean(durationUnit))
+        functionTimerNode.put("duration_units", durationUnit.toString.toLowerCase())
     }
 
     val writer: ObjectWriter = mapper.writerWithDefaultPrettyPrinter()
