@@ -88,6 +88,56 @@ class MetricsImpl @Inject()(lifecycle: ApplicationLifecycle, configuration: Conf
         timerNode.put("duration_units", durationUnit.toString.toLowerCase())
     }
 
+    val summariesNode = rootNode.putObject("summaries")
+    summaries.foreach {
+      summary =>
+        val summaryNode = summariesNode.putObject(meterName(summary.getId))
+        val summarySnapshot = summary.takeSnapshot()
+        summaryNode.put("count", summarySnapshot.count())
+        summaryNode.put("max", summarySnapshot.max())
+        summaryNode.put("mean", summarySnapshot.mean())
+
+        summarySnapshot.percentileValues().foreach {
+          percentileValue =>
+            val percentile = percentileValue.percentile() * 100
+            val percentileName =
+              if (percentile % 1.0 != 0) f"p${percentile}%s"
+              else f"p${percentile}%.0f"
+            summaryNode.put(percentileName, percentileValue.value())
+        }
+    }
+
+    val longTaskTimersNode = rootNode.putObject("longTaskTimers")
+    longTaskTimers.foreach {
+      longTaskTimer =>
+        val longTaskTimerNode = longTaskTimersNode.putObject(meterName(longTaskTimer.getId))
+        longTaskTimerNode.put("max", longTaskTimer.max(durationUnit))
+        longTaskTimerNode.put("mean", longTaskTimer.mean(durationUnit))
+        longTaskTimerNode.put("duration_units", durationUnit.toString.toLowerCase())
+        longTaskTimerNode.put("active_tasks", longTaskTimer.activeTasks())
+    }
+
+    val timeGaugesNode = rootNode.putObject("timeGauges")
+    timeGauges.foreach {
+      timeGauge =>
+        val timeGaugeNode = timeGaugesNode.putObject(meterName(timeGauge.getId))
+        timeGaugeNode.put("value", timeGauge.value(durationUnit))
+    }
+
+    val functionCountersNode = rootNode.putObject("functionCounters")
+    functionCounters.foreach {
+      functionCounter =>
+        val functionCounterNode = functionCountersNode.putObject(meterName(functionCounter.getId))
+        functionCounterNode.put("count", functionCounter.count())
+    }
+
+    val functionTimersNode = rootNode.putObject("functionTimers")
+    functionTimers.foreach {
+      functionTimer =>
+        val functionTimerNode = functionTimersNode.putObject(meterName(functionTimer.getId))
+        functionTimerNode.put("count", functionTimer.count())
+        functionTimerNode.put("mean", functionTimer.mean(durationUnit))
+    }
 
     val writer: ObjectWriter = mapper.writerWithDefaultPrettyPrinter()
     val stringWriter = new StringWriter()
