@@ -10,6 +10,8 @@ Play Version: 2.7.0, Metrics Version: 4.0.5, Scala Versions: 2.12.8
 
 ## Features
 
+
+
 1. Default Metrics Registry
 2. Metrics Servlet
 3. Filter to instrument http requests
