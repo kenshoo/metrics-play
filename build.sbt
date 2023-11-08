@@ -2,11 +2,11 @@ organization:= "com.kenshoo"
 
 name := "metrics-play"
 
-scalaVersion := "2.13.0"
+scalaVersion := "2.13.8"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.12.8")
+crossScalaVersions := Seq(scalaVersion.value, "3.3.0")
 
-val playVersion = "2.7.3"
+val playVersion = "3.0.0"
 
 val metricsPlayVersion = "0.8.2"
 
@@ -17,28 +17,23 @@ version := s"${playVersion}_${metricsPlayVersion}"
 
 scalacOptions := Seq("-unchecked", "-deprecation")
 
-testOptions in Test += Tests.Argument("junitxml", "console")
+Test / testOptions += Tests.Argument("junitxml", "console")
 
-parallelExecution in Test := false
+Test / parallelExecution := false
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
-
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
-
-resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.12"
-
+resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-core" % dropwizardVersion,
     "io.dropwizard.metrics" % "metrics-json" % dropwizardVersion,
     "io.dropwizard.metrics" % "metrics-jvm" % dropwizardVersion,
     "io.dropwizard.metrics" % "metrics-logback" % dropwizardVersion,
-    "com.typesafe.play" %% "play" % playVersion % Provided,
+    "org.playframework" %% "play" % playVersion % Provided,
     "org.joda" % "joda-convert" % "2.2.0",
 
     //Test
-    "com.typesafe.play" %% "play-test" % playVersion % Test,
-    "com.typesafe.play" %% "play-specs2" % playVersion % Test
+    "org.playframework" %% "play-test" % playVersion % Test,
+    "org.playframework" %% "play-specs2" % playVersion % Test
 )
 
 publishMavenStyle := true
@@ -54,7 +49,7 @@ credentials += Credentials(Path.userHome / ".m2" / ".credentials")
 
 pomIncludeRepository := { _ => false }
 
-publishArtifact in Test := false
+Test / publishArtifact := false
 
 pomExtra := (
   <url>https://github.com/kenshoo/metrics-play</url>
