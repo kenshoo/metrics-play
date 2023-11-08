@@ -6,7 +6,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{Json, JsValue}
 import play.api.test.Helpers._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class MetricsSpec extends Specification {
 

@@ -17,7 +17,7 @@ package com.kenshoo.play.metrics
 
 import javax.inject.Inject
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import play.api.mvc._
 import play.api.http.Status
 import com.codahale.metrics._
