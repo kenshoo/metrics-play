@@ -6,7 +6,7 @@ scalaVersion := "2.13.14"
 
 val playVersion = "3.0.5"
 
-val metricsPlayVersion = "0.8.2"
+val metricsPlayVersion = "0.9.0-SNAPSHOT"
 
 val dropwizardVersion = "4.2.27"
 
