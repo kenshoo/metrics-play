@@ -8,7 +8,7 @@ val playVersion = "3.0.5"
 
 val metricsPlayVersion = "0.8.2"
 
-val dropwizardVersion = "4.0.5"
+val dropwizardVersion = "4.2.27"
 
 version := s"${playVersion}_${metricsPlayVersion}"
 
@@ -22,16 +22,16 @@ parallelExecution in Test := false
 resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++= Seq(
-    "io.dropwizard.metrics" % "metrics-core" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-json" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-jvm" % dropwizardVersion,
-    "io.dropwizard.metrics" % "metrics-logback" % dropwizardVersion,
-    "org.playframework" %% "play" % playVersion % Provided,
-    "org.joda" % "joda-convert" % "2.2.0",
+    "io.dropwizard.metrics" %  "metrics-core"    % dropwizardVersion,
+    "io.dropwizard.metrics" %  "metrics-json"    % dropwizardVersion,
+    "io.dropwizard.metrics" %  "metrics-jvm"     % dropwizardVersion,
+    "io.dropwizard.metrics" %  "metrics-logback" % dropwizardVersion,
+    "org.playframework"     %% "play"            % playVersion % Provided,
+    "org.joda"              %  "joda-convert"    % "2.2.3",
 
     //Test
-    "org.playframework" %% "play-test" % playVersion % Test,
-    "org.playframework" %% "play-specs2" % playVersion % Test
+    "org.playframework"     %% "play-test"       % playVersion % Test,
+    "org.playframework"     %% "play-specs2"     % playVersion % Test
 )
 
 publishMavenStyle := true
