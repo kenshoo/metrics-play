@@ -1,12 +1,13 @@
 # metrics-play
 
-This module provides some support for @codahale [Metrics](https://dropwizard.github.io/metrics/4.0.5/) library in a PlayFramework application (Scala)
+This module provides some support for @codahale [Metrics](https://dropwizard.github.io/metrics/4.2.27/) library in a PlayFramework application (Scala).
+Cloned from git@github.com:kenshoo/metrics-play.git
 
 [![Build Status](https://travis-ci.org/kenshoo/metrics-play.png)](https://travis-ci.org/kenshoo/metrics-play)
 
 [![codecov.io](https://img.shields.io/codecov/c/gh/kenshoo/metrics-play/master.svg)](https://codecov.io/github/kenshoo/metrics-play/branch/master)
 
-Play Version: 3.0.5, Metrics Version: 4.0.5, Scala Versions: 2.13
+Play Version: 3.0.5, Metrics Version: 4.2.27, Scala Versions: 2.13
 
 ## Features
 
@@ -22,7 +23,7 @@ Add metrics-play dependency:
 ```scala
     val appDependencies = Seq(
     ...
-    "com.kenshoo" %% "metrics-play" % "3.0.5_0.8.2"
+    "com.kenshoo" %% "metrics-play" % "3.0.5_0.9.0"
     )
 ```
 
@@ -71,7 +72,8 @@ Some configuration is supported through the default configuration file:
 
 ### Metrics Filter
 
-An implementation of the Metrics' instrumenting filter for Play2. It records requests duration, number of active requests and counts each return code
+An implementation of the Metrics' instrumenting filter for PlayFramework. 
+It records requests duration, number of active requests and counts each return code.
 
 
 ```scala
@@ -137,6 +139,7 @@ play.modules.enabled+="myapp.MyMetricsModule"
 
 ## Changes
 
+* 3.0.5_0.9.0 - Upgrade to play 3.0 and dropwizard 4.2.27
 * 2.7.3_0.8.2 - Minor compatability fix for Play 2.8
 * 2.7.3_0.8.1 - Upgrade to play 2.7.3 and support Scala version 2.12.8 / 2.13.0 with dropwizard 4.0.5
 * 2.7.0_0.8.0 - Upgrade to play 2.7.0 and Scala 2.12.8 and dropwizard 4.0.5
