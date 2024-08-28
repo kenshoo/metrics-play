@@ -1,4 +1,4 @@
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += Resolver.jcenterRepo
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
 
