@@ -21,9 +21,9 @@ testOptions in Test += Tests.Argument("junitxml", "console")
 
 parallelExecution in Test := false
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.12"
 
