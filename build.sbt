@@ -4,7 +4,7 @@ name := "metrics-play"
 
 scalaVersion := "2.13.6"
 
-val playVersion = "2.7.3"
+val playVersion = "3.0.5"
 
 val metricsPlayVersion = "0.8.2"
 
@@ -19,24 +19,19 @@ testOptions in Test += Tests.Argument("junitxml", "console")
 
 parallelExecution in Test := false
 
-resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
-
-resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
-
-resolvers += "specs2" at "https://mvnrepository.com/artifact/org.specs2/specs2_2.12"
-
+resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++= Seq(
     "io.dropwizard.metrics" % "metrics-core" % dropwizardVersion,
     "io.dropwizard.metrics" % "metrics-json" % dropwizardVersion,
     "io.dropwizard.metrics" % "metrics-jvm" % dropwizardVersion,
     "io.dropwizard.metrics" % "metrics-logback" % dropwizardVersion,
-    "com.typesafe.play" %% "play" % playVersion % Provided,
+    "org.playframework" %% "play" % playVersion % Provided,
     "org.joda" % "joda-convert" % "2.2.0",
 
     //Test
-    "com.typesafe.play" %% "play-test" % playVersion % Test,
-    "com.typesafe.play" %% "play-specs2" % playVersion % Test
+    "org.playframework" %% "play-test" % playVersion % Test,
+    "org.playframework" %% "play-specs2" % playVersion % Test
 )
 
 publishMavenStyle := true
