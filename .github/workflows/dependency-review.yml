@@ -1,0 +1,10 @@
+name: 'Dependency Review'
+on:
+  pull_request:
+    branches: ['master']
+  workflow_dispatch:
+
+jobs:
+  review:
+    uses: kenshoo/actions/.github/workflows/callable_dependency_review_pr.yml@master
+    secrets: inherit

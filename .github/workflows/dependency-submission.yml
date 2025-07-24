@@ -1,0 +1,10 @@
+name: 'Dependency Submission'
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    uses: kenshoo/actions/.github/workflows/callable_dependency_submission_master.yml@master
+    secrets: inherit
